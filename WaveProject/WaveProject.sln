@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wave", "Wave\Wave.csproj", "{D1D71024-2C65-4928-A121-EE65E0D1536A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wave", "Wave\Wave.csproj", "{D1D71024-2C65-4928-A121-EE65E0D1536A}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{08D02D52-105C-445C-9719-7420A7C2C689}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{D1D71024-2C65-4928-A121-EE65E0D1536A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1D71024-2C65-4928-A121-EE65E0D1536A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1D71024-2C65-4928-A121-EE65E0D1536A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08D02D52-105C-445C-9719-7420A7C2C689}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08D02D52-105C-445C-9719-7420A7C2C689}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08D02D52-105C-445C-9719-7420A7C2C689}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08D02D52-105C-445C-9719-7420A7C2C689}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
