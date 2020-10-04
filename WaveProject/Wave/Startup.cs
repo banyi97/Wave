@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -13,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Wave.Database;
+using Wave.Services;
 
 namespace Wave
 {
@@ -30,8 +34,23 @@ namespace Wave
         {
             services.AddControllers();
 
+            services.AddAutoMapper(typeof(MapperConfig));
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            var authority = Configuration["Auth0ApiConfig:Authority"];
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.Authority = authority;
+                options.Audience = Configuration["Auth0ApiConfig:Identifier"];
+                options.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
+                options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
+            });
 
             services.AddSwaggerGen(c =>
             {
