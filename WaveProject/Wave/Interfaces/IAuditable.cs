@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Wave.Interfaces
 {
-    public class IAuditable
+    public interface IAuditable
     {
         DateTime CreatedDate { get; set; }
         DateTime LatestUpdate { get; set; }

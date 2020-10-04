@@ -22,8 +22,6 @@ namespace Wave.Models
         public ReleaseDatePrecision ReleaseDatePrecision { get; set; }
         public AlbumType AlbumType { get; set; }
 
-        public DateTime AvailableFromUtfTime { get; set; }
-
         public List<Track> Tracks { get; set; } = new List<Track>();
         public Image Image { get; set; }
 
