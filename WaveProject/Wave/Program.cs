@@ -6,6 +6,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Microsoft.Data.SqlClient;
+using Wave.Database;
+using System.Runtime.CompilerServices;
+using Wave.Services;
 
 namespace Wave
 {
@@ -13,7 +18,32 @@ namespace Wave
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console(outputTemplate: "{Timestamp:HH:mm} [{Level}] ({ThreadId}) {Message}{NewLine}{Exception}")
+                .CreateLogger();
+            try
+            {
+                Log.Information("Starting up");
+                var build = CreateHostBuilder(args).Build();                            
+                try
+                {
+                    build.MigrateDbContext<ApplicationDbContext>(false);
+                }
+                catch (Exception ex)
+                {
+                    Log.Fatal(ex, "Database migration failed");
+                    throw ex;
+                }
+                build.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Application start-up failed");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -22,5 +52,23 @@ namespace Wave
                 {
                     webBuilder.UseStartup<Startup>();
                 });
+
+        public bool IsDatabaseOnline(string con)
+        {
+            bool isConnected = false;
+            using var connect = new SqlConnection(con);
+
+            try
+            {
+                connect.Open();
+                isConnected = true;
+            }
+            finally
+            {
+                if (isConnected)
+                    connect.Close();
+            }
+            return isConnected;
+        }
     }
 }
