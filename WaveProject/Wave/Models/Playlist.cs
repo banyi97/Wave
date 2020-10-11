@@ -8,7 +8,7 @@ using Wave.Interfaces;
 
 namespace Wave.Models
 {
-    public class Playlist : IAuditable
+    public class Playlist : IAuditable, INumberOf<int>
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -21,7 +21,7 @@ namespace Wave.Models
         public int NumberOf { get; set; }
 
         public List<PlaylistElement> PlaylistElements { get; set; } = new List<PlaylistElement>();
-        public Image Image { get; set; }
+        public PlaylistImage Image { get; set; }
 
         public DateTime CreatedDate { get; set; }
         public DateTime LatestUpdate { get; set; }

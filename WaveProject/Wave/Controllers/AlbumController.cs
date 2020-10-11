@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using NAudio.Wave;
 using Wave.Database;
 using Wave.Dtos;
 using Wave.Models;
@@ -19,13 +23,19 @@ namespace Wave.Controllers
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly BlobServiceClient _blobService;
+        private readonly IOptions<AzureBlobConfig> _config;
 
         public AlbumController(
             ApplicationDbContext dbContext,
-            IMapper mapper)
+            IMapper mapper,
+            BlobServiceClient blobService,
+            IOptions<AzureBlobConfig> config)
         {
             _dbContext = dbContext ?? throw new NullReferenceException();
             _mapper = mapper ?? throw new NullReferenceException();
+            _blobService = blobService ?? throw new NullReferenceException();
+            _config = config ?? throw new NullReferenceException();
         }
 
         [HttpGet]
@@ -203,6 +213,149 @@ namespace Wave.Controllers
             albumTracks.Remove(track);
             _dbContext.Tracks.Remove(track);
 
+            await _dbContext.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost("{id}/images")]
+        [DisableRequestSizeLimit]
+        public async Task<IActionResult> UploadAlbumImage([FromRoute] string id, IFormFile file)
+        {
+            if (String.IsNullOrWhiteSpace(id))
+                return BadRequest();
+            if (file is null || file.Length < 0)
+                return BadRequest("file null");
+            if (!file.ContentType.StartsWith("image/"))
+                return StatusCode(415);
+
+            var album = await _dbContext.Albums
+                .Include(q => q.Image)
+                .FirstOrDefaultAsync(q => q.Id == id);
+            if (album.Image != null)
+                _dbContext.AlbumImages.Remove(album.Image);
+
+            var img = new AlbumImage();
+            album.Image = img;
+            await _dbContext.AlbumImages.AddAsync(img);
+
+            var blobContainer = _blobService.GetBlobContainerClient(this._config.Value.ContainerImg);
+            await blobContainer.CreateIfNotExistsAsync(PublicAccessType.Blob);
+
+            var blob = blobContainer.GetBlobClient(img.Id);
+            await blob.DeleteIfExistsAsync();
+            await using (var stream = file.OpenReadStream())
+            {
+                await blob.UploadAsync(stream, new BlobHttpHeaders { ContentType = file.ContentType });
+            }
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(_mapper.Map<ImageDto>(img));
+        }
+
+        [HttpDelete("{id}/images/{sId}")]
+        public async Task<IActionResult> RemoveAlbumImage(string id, string sId)
+        {
+            var album = await _dbContext.Albums
+                .Include(q => q.Image)
+                .FirstOrDefaultAsync(q => q.Id == id);
+            if (album is null)
+                return BadRequest();
+    
+            if (album.Image?.Id == sId)
+            {
+                _dbContext.AlbumImages.Remove(album.Image);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return Ok();
+        }
+
+        [HttpPost("{id}/track/{sId}")]
+        [DisableRequestSizeLimit]
+        public async Task<IActionResult> UploadTrack(string id, string sId, IFormFile file)
+        {
+            if (String.IsNullOrWhiteSpace(id))
+                return BadRequest();
+            if (file is null || file.Length < 0)
+                return BadRequest();
+            if (!file.ContentType.StartsWith("audio/"))
+                return StatusCode(415);
+
+            var track = await _dbContext.Tracks
+                .Include(q => q.Album)
+                    .ThenInclude(q => q.Artist)
+                .Where(q => q.Id == sId)
+                .FirstOrDefaultAsync();
+
+            if (track is null)
+                return NotFound();
+            if (track.Album.Artist.ApplicationUserId != this.User.Identity.Name)
+                return Forbid();
+            if (track.Album.Id != id)
+                return BadRequest();
+
+            var trackFile = track.TrackFile ?? new TrackFile();
+            track.TrackFile = trackFile;
+            if (String.IsNullOrEmpty(trackFile.Id))
+                await _dbContext.TrackFiles.AddAsync(trackFile);
+
+
+            var ext = file.FileName.Substring(file.FileName.LastIndexOf('.'));
+            switch (ext)
+            {
+                case ".mp3":
+                    await using (var stream = file.OpenReadStream())
+                    {
+                        track.Duration = new Mp3FileReader(stream).TotalTime;
+                    }
+                    break;
+                case ".wav":
+                    await using (var stream = file.OpenReadStream())
+                    {
+                        track.Duration = new WaveFileReader(stream).TotalTime;
+                    }
+                    break;
+                default:
+                    return BadRequest();
+            }
+
+            var container = _blobService.GetBlobContainerClient(_config.Value.ContainerTrack);
+            await container.CreateIfNotExistsAsync(PublicAccessType.None);
+            var blob = container.GetBlobClient(trackFile.Id);
+            await blob.DeleteIfExistsAsync();
+            await using (var stream = file.OpenReadStream())
+            {
+                try
+                {
+                    await blob.UploadAsync(stream, new BlobHttpHeaders { ContentType = file.ContentType });
+                }
+                catch (Exception)
+                {
+                    return Problem();
+                }
+            }
+            await _dbContext.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpDelete("{id}/track/{sId}")]
+        public async Task<IActionResult> RemoveTrackFile(string id, string sId)
+        {
+            if (String.IsNullOrWhiteSpace(id))
+                return BadRequest();
+            var track = await _dbContext.Tracks
+                .Include(q => q.Album)
+                    .ThenInclude(q => q.Artist)
+                .Include(q => q.TrackFile)
+                .Where(q => q.Id == sId && q.Album.Id == id)
+                .FirstOrDefaultAsync();
+            if (track is null)
+                return NotFound();
+            if (track.Album.Artist.ApplicationUserId != this.User.Identity.Name)
+                return Forbid();
+            if (track.TrackFile is null)
+                return Ok();
+            _dbContext.Remove(track.TrackFile);
             await _dbContext.SaveChangesAsync();
             return Ok();
         }

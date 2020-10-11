@@ -8,7 +8,7 @@ using Wave.Interfaces;
 
 namespace Wave.Models
 {
-    public class TrackFile : IAuditable
+    public class TrackFile : IAuditable, ICascadeRemovable<string>
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -19,5 +19,7 @@ namespace Wave.Models
 
         public DateTime CreatedDate { get; set; }
         public DateTime LatestUpdate { get; set; }
+
+        public virtual string CascadeId => this.Id;
     }
 }

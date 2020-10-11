@@ -17,6 +17,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Wave.Database;
 using Wave.Services;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Wave.Models;
 
 namespace Wave
 {
@@ -51,6 +54,10 @@ namespace Wave
                 options.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
                 options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
             });
+
+            services.Configure<AzureBlobConfig>(Configuration.GetSection("AzureBlobConfig"));
+
+            services.AddSingleton<BlobServiceClient>(new BlobServiceClient(Configuration["AzureBlobConfig:ConnectionString"]));
 
             services.AddSwaggerGen(c =>
             {

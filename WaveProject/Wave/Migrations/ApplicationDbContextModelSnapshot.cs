@@ -34,9 +34,6 @@ namespace Wave.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ImageId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Label")
                         .HasColumnType("nvarchar(max)");
 
@@ -53,9 +50,31 @@ namespace Wave.Migrations
 
                     b.HasIndex("ArtistId");
 
-                    b.HasIndex("ImageId");
-
                     b.ToTable("Albums");
+                });
+
+            modelBuilder.Entity("Wave.Models.AlbumImage", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AlbumId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LatestUpdate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AlbumId")
+                        .IsUnique()
+                        .HasFilter("[AlbumId] IS NOT NULL");
+
+                    b.ToTable("AlbumImages");
                 });
 
             modelBuilder.Entity("Wave.Models.Artist", b =>
@@ -73,9 +92,6 @@ namespace Wave.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("LatestUpdate")
                         .HasColumnType("datetime2");
 
@@ -84,15 +100,16 @@ namespace Wave.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ImageId");
-
                     b.ToTable("Artists");
                 });
 
-            modelBuilder.Entity("Wave.Models.Image", b =>
+            modelBuilder.Entity("Wave.Models.ArtistImage", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ArtistId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedDate")
@@ -103,7 +120,11 @@ namespace Wave.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Images");
+                    b.HasIndex("ArtistId")
+                        .IsUnique()
+                        .HasFilter("[ArtistId] IS NOT NULL");
+
+                    b.ToTable("ArtistImages");
                 });
 
             modelBuilder.Entity("Wave.Models.Playlist", b =>
@@ -117,9 +138,6 @@ namespace Wave.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("ImageId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsPublic")
                         .ValueGeneratedOnAdd()
@@ -136,8 +154,6 @@ namespace Wave.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ImageId");
 
                     b.ToTable("Playlists");
                 });
@@ -170,6 +186,30 @@ namespace Wave.Migrations
                     b.HasIndex("TrackId");
 
                     b.ToTable("PlaylistElements");
+                });
+
+            modelBuilder.Entity("Wave.Models.PlaylistImage", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LatestUpdate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PlaylistId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlaylistId")
+                        .IsUnique()
+                        .HasFilter("[PlaylistId] IS NOT NULL");
+
+                    b.ToTable("PlaylistImages");
                 });
 
             modelBuilder.Entity("Wave.Models.Track", b =>
@@ -248,24 +288,22 @@ namespace Wave.Migrations
                         .WithMany("Albums")
                         .HasForeignKey("ArtistId")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Wave.Models.Image", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId");
                 });
 
-            modelBuilder.Entity("Wave.Models.Artist", b =>
+            modelBuilder.Entity("Wave.Models.AlbumImage", b =>
                 {
-                    b.HasOne("Wave.Models.Image", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId");
+                    b.HasOne("Wave.Models.Album", "Album")
+                        .WithOne("Image")
+                        .HasForeignKey("Wave.Models.AlbumImage", "AlbumId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Wave.Models.Playlist", b =>
+            modelBuilder.Entity("Wave.Models.ArtistImage", b =>
                 {
-                    b.HasOne("Wave.Models.Image", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId");
+                    b.HasOne("Wave.Models.Artist", "Artist")
+                        .WithOne("Image")
+                        .HasForeignKey("Wave.Models.ArtistImage", "ArtistId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Wave.Models.PlaylistElement", b =>
@@ -279,6 +317,14 @@ namespace Wave.Migrations
                         .WithMany("TrackOfPlaylistElements")
                         .HasForeignKey("TrackId")
                         .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("Wave.Models.PlaylistImage", b =>
+                {
+                    b.HasOne("Wave.Models.Playlist", "Playlist")
+                        .WithOne("Image")
+                        .HasForeignKey("Wave.Models.PlaylistImage", "PlaylistId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Wave.Models.Track", b =>

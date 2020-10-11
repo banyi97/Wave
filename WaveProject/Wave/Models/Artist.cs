@@ -18,7 +18,7 @@ namespace Wave.Models
         public string Description { get; set; }
 
         public List<Album> Albums { get; set; } = new List<Album>();
-        public Image Image { get; set; }
+        public ArtistImage Image { get; set; }
 
         public string ApplicationUserId { get; set; }
 

@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Storage.Blobs;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +19,21 @@ namespace Wave.Database
         public DbSet<TrackFile> TrackFiles { get; set; }
         public DbSet<Playlist> Playlists { get; set; }
         public DbSet<PlaylistElement> PlaylistElements { get; set; }
-        public DbSet<Image> Images { get; set; }
 
-        public ApplicationDbContext(DbContextOptions options) : base(options)
+        public DbSet<AlbumImage> AlbumImages { get; set; }
+        public DbSet<ArtistImage> ArtistImages { get; set; }
+        public DbSet<PlaylistImage> PlaylistImages { get; set; }
+
+        private readonly BlobServiceClient _blobService;
+        private readonly IOptions<AzureBlobConfig> _config;
+
+        public ApplicationDbContext(
+            DbContextOptions options,
+            BlobServiceClient blobService,
+            IOptions<AzureBlobConfig> config) : base(options)
         {
-            
+            _blobService = blobService ?? throw new NullReferenceException();
+            _config = config ?? throw new NullReferenceException();
         }  
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -69,6 +81,23 @@ namespace Wave.Database
                 .HasForeignKey(pe => pe.TrackId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            builder.Entity<ArtistImage>()
+                .HasOne(q => q.Artist)
+                .WithOne(q => q.Image)
+                .HasForeignKey<ArtistImage>(q => q.ArtistId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<AlbumImage>()
+                .HasOne(q => q.Album)
+                .WithOne(q => q.Image)
+                .HasForeignKey<AlbumImage>(q => q.AlbumId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PlaylistImage>()
+                .HasOne(q => q.Playlist)
+                .WithOne(q => q.Image)
+                .HasForeignKey<PlaylistImage>(q => q.PlaylistId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
@@ -80,6 +109,7 @@ namespace Wave.Database
         public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
         {
             UpdateAuditEntities();
+            await DeletedEntityAsync();
             return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
@@ -103,5 +133,28 @@ namespace Wave.Database
                 entity.LatestUpdate = now;
             }
         }
+
+        private async Task DeletedEntityAsync()
+        {
+            var allRemovedEntries = base.ChangeTracker.Entries()
+                .Where(q => q.Entity is ICascadeRemovable<string> && q.State == EntityState.Deleted);
+            
+            var imgContainer = _blobService.GetBlobContainerClient(_config.Value.ContainerImg);
+            var trackContainer = _blobService.GetBlobContainerClient(_config.Value.ContainerTrack);
+
+            foreach (var item in allRemovedEntries)
+            {
+                var entity = (ICascadeRemovable<string>)item.Entity;
+                if (item.Entity is Image)
+                {
+                    await imgContainer.GetBlobClient(entity.CascadeId).DeleteIfExistsAsync();
+                }
+                else if (item.Entity is TrackFile)
+                {
+                    await trackContainer.GetBlobClient(entity.CascadeId).DeleteIfExistsAsync();
+                }
+            }
+        }
+
     }
 }

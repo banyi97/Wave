@@ -8,7 +8,7 @@ using Wave.Interfaces;
 
 namespace Wave.Models
 {
-    public class PlaylistElement : IAuditable
+    public class PlaylistElement : IAuditable, INumberOf<int>
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

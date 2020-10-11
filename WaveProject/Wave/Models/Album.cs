@@ -23,7 +23,7 @@ namespace Wave.Models
         public AlbumType AlbumType { get; set; }
 
         public List<Track> Tracks { get; set; } = new List<Track>();
-        public Image Image { get; set; }
+        public AlbumImage Image { get; set; }
 
         public DateTime CreatedDate { get; set; }
         public DateTime LatestUpdate { get; set; }

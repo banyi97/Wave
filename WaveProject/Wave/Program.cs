@@ -52,23 +52,5 @@ namespace Wave
                 {
                     webBuilder.UseStartup<Startup>();
                 });
-
-        public bool IsDatabaseOnline(string con)
-        {
-            bool isConnected = false;
-            using var connect = new SqlConnection(con);
-
-            try
-            {
-                connect.Open();
-                isConnected = true;
-            }
-            finally
-            {
-                if (isConnected)
-                    connect.Close();
-            }
-            return isConnected;
-        }
     }
 }

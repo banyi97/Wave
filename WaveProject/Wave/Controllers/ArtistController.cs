@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Threading.Tasks;
 using AutoMapper;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Wave.Database;
 using Wave.Dtos;
 using Wave.Models;
@@ -19,13 +23,19 @@ namespace Wave.Controllers
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly BlobServiceClient _blobService;
+        private readonly IOptions<AzureBlobConfig> _config;
 
         public ArtistController(
             ApplicationDbContext dbContext,
-            IMapper mapper)
+            IMapper mapper,
+            BlobServiceClient blobService,
+            IOptions<AzureBlobConfig> config)
         {
             _dbContext = dbContext ?? throw new NullReferenceException();
             _mapper = mapper ?? throw new NullReferenceException();
+            _blobService = blobService ?? throw new NullReferenceException();
+            _config = config ?? throw new NullReferenceException();
         }
 
         [HttpGet]
@@ -141,5 +151,59 @@ namespace Wave.Controllers
             //}
             return Ok(albums);
         }
+
+        [HttpPost("{id}/images")]
+        [DisableRequestSizeLimit]
+        public async Task<IActionResult> UploadArtistImage([FromRoute] string id, IFormFile file)
+        {
+            if (String.IsNullOrWhiteSpace(id))
+                return BadRequest();
+            if (file is null || file.Length < 0)
+                return BadRequest("file null");
+            if (!file.ContentType.StartsWith("image/"))
+                return StatusCode(415);
+
+            var artist = await _dbContext.Artists
+                .Include(q => q.Image)
+                .FirstOrDefaultAsync(q => q.Id == id);
+            if (artist.Image != null)
+                _dbContext.ArtistImages.Remove(artist.Image);
+
+            var img = new ArtistImage();
+            artist.Image = img;
+            await _dbContext.ArtistImages.AddAsync(img);
+
+            var blobContainer = _blobService.GetBlobContainerClient(this._config.Value.ContainerImg);
+            await blobContainer.CreateIfNotExistsAsync(PublicAccessType.Blob);
+
+            var blob = blobContainer.GetBlobClient(img.Id);
+            await blob.DeleteIfExistsAsync();
+            await using (var stream = file.OpenReadStream())
+            {
+                await blob.UploadAsync(stream, new BlobHttpHeaders { ContentType = file.ContentType });
+            }
+            await _dbContext.SaveChangesAsync();
+            
+            return Ok(_mapper.Map<ImageDto>(img));
+        }
+
+        [HttpDelete("{id}/images/{sId}")]
+        public async Task<IActionResult> RemoveArtistImage(string id, string sId)
+        {
+            var artist = await _dbContext.Artists
+                .Include(q => q.Image)
+                .FirstOrDefaultAsync(q => q.Id == id);
+            if (artist is null)
+                return BadRequest();
+
+            if(artist.Image?.Id == sId)
+            {
+                _dbContext.ArtistImages.Remove(artist.Image);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return Ok();
+        }
+
     }
 }
