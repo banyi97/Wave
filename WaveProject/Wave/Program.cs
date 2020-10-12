@@ -27,7 +27,7 @@ namespace Wave
                 var build = CreateHostBuilder(args).Build();                            
                 try
                 {
-                    build.MigrateDbContext<ApplicationDbContext>(false);
+                    build.MigrateDbContext<ApplicationDbContext>();
                 }
                 catch (Exception ex)
                 {

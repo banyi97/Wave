@@ -8,8 +8,11 @@ services:
             dockerfile: Wave/Dockerfile   
         depends_on:
             - db
+            - blob
     db:
         image: "mcr.microsoft.com/mssql/server:2017-CU21-ubuntu-16.04"
         environment:
             SA_PASSWORD: "nagyonerospassword"
             ACCEPT_EULA: "Y"
+    blob:
+        image: "mcr.microsoft.com/azure-storage/azurite:3.8.0"

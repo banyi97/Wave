@@ -15,7 +15,7 @@ namespace Wave.Services
 {
     public static class DbContextMigrate
     {
-        public static IHost MigrateDbContext<TContext>(this IHost host, bool isDocker = true) where TContext : DbContext
+        public static IHost MigrateDbContext<TContext>(this IHost host) where TContext : DbContext
         {
             //https://anduin.aiursoft.com/post/2019/12/14/auto-update-database-for-aspnet-core-with-entity-framework
             using (var scope = host.Services.CreateScope())
@@ -25,23 +25,20 @@ namespace Wave.Services
                 var context = services.GetService<TContext>();
                 var config = services.GetService<IConfiguration>();
 
-                if (isDocker)
+                var connection = new SqlConnection(config.GetConnectionString("DefaultConnection"));
+                var isConnected = false;
+                do
                 {
-                    var connection = new SqlConnection(config.GetConnectionString("DefaultConnection"));
-                    var isConnected = false;
-                    do
+                    try
                     {
-                        try
-                        {
-                            connection.Open();
-                            isConnected = true;
-                        }
-                        catch (Exception) { }
-                        Thread.Sleep(5000);
-                    } while (!isConnected);
-                    connection.Close();
-                    connection.Dispose();
-                }
+                        connection.Open();
+                        isConnected = true;
+                    }
+                    catch (Exception) { }
+                    Thread.Sleep(5000);
+                } while (!isConnected);
+                connection.Close();
+                connection.Dispose();
 
                 try
                 {
