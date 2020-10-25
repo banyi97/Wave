@@ -1,0 +1,25 @@
+<mat-toolbar color="primary">     
+  <mat-toolbar-row>
+    <span>
+      <button mat-button (click)="location.back()">
+        <mat-icon aria-hidden="false" aria-label="back">chevron_left</mat-icon>
+      </button>
+      <button mat-button (click)="location.forward()">
+        <mat-icon aria-hidden="false" aria-label="forward">chevron_right</mat-icon>
+      </button>
+    </span>
+    <span class="toolbar-spacer"></span>
+    <div *ngIf="auth.loggedIn">
+      <div ngbDropdown *ngIf="auth.userProfile$ | async as profile">
+          <button mat-button id="dropdownBasic1" ngbDropdownToggle>{{profile.nickname}}</button>
+          <div ngbDropdownMenu aria-labelledby="dropdownBasic1" class="col">
+              <button ngbDropdownItem [routerLink]="['/profile']">Profile</button>
+              <button ngbDropdownItem (click)="auth.logout()">Log Out</button>
+          </div>
+      </div>
+    </div>
+    <div *ngIf="!auth.loggedIn">
+      <button mat-button (click)="auth.login()">Log In</button>
+    </div>
+  </mat-toolbar-row>
+</mat-toolbar>

@@ -1,0 +1,25 @@
+<div class="container">
+  <div *ngIf="ps.selPlaylist | async as playlist" class="row">
+    <div class="col-3 text-center">
+      <img  [src]="playlist.image!= null ? playlist.image.uri : 'wave.jpg'" width="200" height="200" /> 
+      <h2>{{playlist.title}}</h2>
+      <button [disabled]="playlist.playlistElements.length == 0" class="btn btn-primary" (click)="play()">Play</button>
+      <h5>{{playlist.playlistElements.length}} {{playlist.playlistElements.length < 2 ? "song" : "songs"}}</h5>
+    </div>
+  <cdk-virtual-scroll-viewport class="col-9" itemSize="50" style="height:80vh">      
+      <ul class="list-group" cdkDropList (cdkDropListDropped)="drop($event)" [cdkDropListDisabled]="!playlist.isMy">
+          <li style="padding:unset" *ngFor="let element of playlist.playlistElements; let i = index" [attr.data-index]="i" class="list-group-item" [contextMenu]="playlistMenu" [contextMenuSubject]="element" cdkDrag>
+              <app-track-view [track]="element.track" [index]="i" (playThis)="play($event)"></app-track-view>
+          </li>
+      </ul>
+  </cdk-virtual-scroll-viewport>
+  </div>
+</div>
+
+<context-menu #playlistMenu>
+  <ng-template *ngFor="let action of contextMenuActions" contextMenuItem let-item
+               [visible]="action.visible" [enabled]="action.enabled" [divider]="action.divider"
+               (execute)="action.click($event.item)">
+    {{ action.html(item) }}
+  </ng-template>
+</context-menu>

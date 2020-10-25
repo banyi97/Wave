@@ -1,0 +1,13 @@
+<h2 mat-dialog-title>{{data.isCreate ? "Create new playlist" : "Rename the playlist"}}</h2>
+<mat-dialog-content class="mat-typography">
+  <form [formGroup]="titleForm">
+    <mat-form-field>
+      <mat-label>Playlist Name</mat-label>
+      <input formControlName="title" matInput placeholder="{{data.isCreate ? 'New playlist' : ''}}">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button (click)="onSubmit()" cdkFocusInitial>{{data.isCreate ? "Create" : "Rename"}}</button>
+</mat-dialog-actions>

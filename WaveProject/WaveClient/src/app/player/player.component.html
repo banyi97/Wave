@@ -1,0 +1,52 @@
+<div class="container-fluid" *ngIf="player.actual$ | async as actual">
+    <div class="row d-flex justify-content-center align-middle">
+      <div class="col-3">
+        <div class="row pl-2 pt-2" *ngIf="actual.sourceTrack as track">
+          <img [src]="track.albumImageUri ? track.albumImageUri : 'wave.jpg'" height="80" width="80" >
+          <div class="col">
+            <div class="row pl-1">
+              <a [routerLink]='["/album/" + track.albumId]'><small>{{track.title}}</small></a>
+            </div>
+            <div class="row pl-1">
+              <a [routerLink]='["/artist/" + track.artistId]'><small>{{track.artistName}}</small></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="row d-flex justify-content-center align-middle" >
+          <div style="padding:10px" *ngIf="player.progress$ | async as progress">{{(isLocal ? locNum : progress.played) | durationSecConvert}}</div>
+          <mat-slider 
+            #duration style="width:70%;padding:10px" 
+            min="0" [max]="actual.howl.duration()" 
+            (input)="inputListener($event)"
+            (mousedown)="onDown()"
+            [value]="isLocal ? locNum : player.seek" >
+          </mat-slider>
+          <div style="padding:10px" >{{actual.howl.duration() | durationSecConvert}}</div>
+        </div>
+        <div class="row d-flex justify-content-center" >
+          <button  mat-button (click)="player.back()">
+            <mat-icon mat-list-icon >skip_previous</mat-icon>
+          </button>
+          <button mat-button *ngIf="!player.isPlayed" (click)="player.play()">
+            <mat-icon mat-list-icon>play_circle_filled</mat-icon>
+          </button>
+          <button mat-button *ngIf="player.isPlayed" (click)="player.pause()">
+            <mat-icon mat-list-icon>pause</mat-icon>
+          </button>
+          <button mat-button (click)="player.next()">
+            <mat-icon mat-list-icon>skip_next</mat-icon>
+          </button>     
+        </div>
+      </div>
+      <div class="col-3">
+        <button mat-icon-button	(click)="player.mute()">
+          <mat-icon *ngIf="player.isMuted && !player.volumeIsHigher50Proc" mat-list-icon>volume_down</mat-icon>
+          <mat-icon *ngIf="player.isMuted && player.volumeIsHigher50Proc" mat-list-icon>volume_up</mat-icon>
+          <mat-icon *ngIf="!player.isMuted" mat-list-icon>volume_off</mat-icon>
+        </button>
+        <mat-slider #volume class="time-slider" min="0" max="1" step="0.01" [value]="player.volume" (input)="player.volume = volume.value"></mat-slider>
+      </div>
+    </div>
+  </div>

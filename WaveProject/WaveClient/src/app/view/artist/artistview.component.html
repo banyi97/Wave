@@ -1,0 +1,12 @@
+<div class="contener">
+  <div class="text-center" *ngIf="artist">
+    <a [routerLink]='["/artist/" + artist.id]'>
+      <div>
+        <img [src]="artist.image!= null ? artist.image.uri : 'wave.jpg'" width="200" height="200" />
+      </div>
+      <div>
+        {{artist.name}}
+      </div>
+    </a>
+  </div>
+</div>

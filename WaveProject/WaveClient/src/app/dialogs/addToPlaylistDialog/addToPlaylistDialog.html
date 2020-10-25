@@ -1,0 +1,9 @@
+<h2 mat-dialog-title>Select the playlist!</h2>
+<mat-dialog-content class="mat-typography">
+  <div class="row" *ngIf="ps.playlists$ | async as playlists">       
+    <app-playlist-view style="cursor:pointer" [isSearch]="false" (click)="addToPlaylist(playlist.id)" class="mx-2 mt-2" *ngFor="let playlist of playlists" [playlist]="playlist"></app-playlist-view>
+ </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+</mat-dialog-actions>

@@ -1,0 +1,20 @@
+<div class="contener">
+    <div class="text-center">
+      <a [routerLink]='["/playlist/" + playlist.id]' *ngIf="isSearch">
+        <div>
+          <img [src]="playlist.image!= null ? playlist.image.uri : 'wave.jpg'" width="200" height="200" />
+        </div>
+        <div>
+          {{ playlist.title }}
+        </div>
+      </a>
+      <div *ngIf="!isSearch">
+        <div>
+          <img [src]="playlist.image!= null ? playlist.image.uri : 'wave.jpg'" width="200" height="200" />
+        </div>
+        <div>
+          {{ playlist.title }}
+        </div>
+      </div>
+    </div>
+  </div>

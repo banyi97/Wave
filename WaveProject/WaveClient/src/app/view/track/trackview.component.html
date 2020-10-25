@@ -1,0 +1,20 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="px-1">
+      <button [disabled]="!track.uri" (click)="play()" mat-icon-button>
+        <mat-icon mat-list-icon>play_circle_filled</mat-icon>
+      </button>
+    </div>
+    <div class="col" [ngClass]="{'d-flex align-items-center' : isArtistTop}">
+      <div class="row">
+        <span>{{track.title}}</span>
+      </div>
+      <div class="row" *ngIf="!isArtistTop">
+        <a [routerLink]='["/artist/"+track.artistId]'>{{track.artistName}}</a>
+      </div>
+    </div>
+    <div class="d-flex align-items-center">
+      <span class="pr-1">{{track.duration | durationSecConvert}}</span>
+    </div>
+  </div>
+</div>

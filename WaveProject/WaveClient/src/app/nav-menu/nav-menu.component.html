@@ -1,0 +1,45 @@
+<mat-nav-list>     
+    <mat-list-item [routerLink]='["/"]'>
+      <mat-icon matListIcon>home</mat-icon>
+      <a matLine>Home</a>
+    </mat-list-item>
+  
+    <mat-list-item [routerLink]='["/search/resent"]'>
+      <mat-icon matListIcon>search</mat-icon>
+      <a matLine>Search</a>
+    </mat-list-item>
+  
+    <mat-list-item [routerLink]='["/yourlib"]'>
+      <mat-icon matListIcon>library_music</mat-icon>
+      <a matLine>Your library</a>
+    </mat-list-item>
+  
+    <mat-list-item style="pointer-events: none;"> Playlist </mat-list-item>
+    <mat-list-item (click)="createNewPlaylist()">
+      <mat-icon matListIcon>playlist_add</mat-icon>
+      <a matLine>Create playlist</a>
+    </mat-list-item>
+  
+    <div *ngIf="auth.loggedIn" >
+      <div *ngIf="ps.playlists$ | async as playlists"> 
+   
+        <cdk-virtual-scroll-viewport itemSize="50" style="min-height:200px;height:50vh;overflow-x: hidden;">        
+          <mat-nav-list cdkDropList (cdkDropListDropped)="drop($event)">
+            <mat-list-item *ngFor="let playlist of playlists" [routerLink]='["/playlist/" + playlist.id]' [contextMenu]="sidebarMenu" [contextMenuSubject]="playlist" cdkDrag>
+              <a>{{playlist.title}}</a>
+            </mat-list-item>
+          </mat-nav-list>
+        </cdk-virtual-scroll-viewport>
+  
+      </div>
+    </div>
+  
+  </mat-nav-list>
+  
+  <context-menu #sidebarMenu>
+    <ng-template *ngFor="let action of contextMenuActions" contextMenuItem let-item
+                 [visible]="action.visible" [enabled]="action.enabled" [divider]="action.divider"
+                 (execute)="action.click($event.item)">
+      {{ action.html(item) }}
+    </ng-template>
+  </context-menu>
