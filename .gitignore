@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+WaveProject/WaveClient/__azurite_db_blob__.json
+WaveProject/WaveClient/__azurite_db_blob_extent__.json

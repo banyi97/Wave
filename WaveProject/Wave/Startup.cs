@@ -20,6 +20,8 @@ using Wave.Services;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Wave.Models;
+using Wave.Interfaces;
+using Wave.Hubs;
 
 namespace Wave
 {
@@ -39,6 +41,8 @@ namespace Wave
 
             services.AddAutoMapper(typeof(MapperConfig));
 
+            services.AddSignalR();
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -56,6 +60,8 @@ namespace Wave
             });
 
             services.Configure<AzureBlobConfig>(Configuration.GetSection("AzureBlobConfig"));
+
+            var connString = Configuration["AzureBlobConfig:ConnectionString"];
 
             services.AddSingleton<BlobServiceClient>(new BlobServiceClient(Configuration["AzureBlobConfig:ConnectionString"]));
 
@@ -80,6 +86,17 @@ namespace Wave
                 var securityRequirement = new OpenApiSecurityRequirement { { securitySchema, new[] { "Bearer" } } };
                 c.AddSecurityRequirement(securityRequirement);
             });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("read:admin", policy => policy.Requirements.Add(new HasScopeRequirement("read:admin", authority)));
+
+                options.AddPolicy("write:admin", policy => policy.Requirements.Add(new HasScopeRequirement("write:admin", authority)));
+
+                options.AddPolicy("modify:admin", policy => policy.Requirements.Add(new HasScopeRequirement("modify:admin", authority)));
+
+                options.AddPolicy("remove:admin", policy => policy.Requirements.Add(new HasScopeRequirement("remove:admin", authority)));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -100,12 +117,12 @@ namespace Wave
                 sw.SwaggerEndpoint("/swagger/v1/swagger.json", "Wave API V1");
             });
 
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllers().RequireAuthorization();
+                endpoints.MapHub<NotificationHub>("/notification");
             });
         }
     }

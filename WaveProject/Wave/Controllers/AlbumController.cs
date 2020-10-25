@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +14,11 @@ using NAudio.Wave;
 using Wave.Database;
 using Wave.Dtos;
 using Wave.Models;
+using Wave.Services;
 
 namespace Wave.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
@@ -38,6 +41,7 @@ namespace Wave.Controllers
             _config = config ?? throw new NullReferenceException();
         }
 
+        [Authorize(Policy = "read:admin")]
         [HttpGet]
         public async Task<IActionResult> GetAlbums([FromQuery] int from = 0, [FromQuery] int take = 50)
         {
@@ -53,6 +57,7 @@ namespace Wave.Controllers
             return Ok(albums);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAlbum([FromRoute] string id)
         {
@@ -70,6 +75,7 @@ namespace Wave.Controllers
             return Ok(album);
         }
 
+        [Authorize(Policy = "write:admin")]
         [HttpPost]
         public async Task<IActionResult> CreateAlbum([FromBody] CreateAlbumDto dto)
         {
@@ -94,6 +100,7 @@ namespace Wave.Controllers
             return Ok(_mapper.Map<Album, AlbumDto>(album));
         }
 
+        [Authorize(Policy = "modify:admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> ModifyAlbum([FromRoute] string id, [FromBody] AlbumDto dto)
         {
@@ -113,6 +120,7 @@ namespace Wave.Controllers
             return Ok(_mapper.Map<Album, AlbumDto>(album));
         }
 
+        [Authorize(Policy = "remove:admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> RemoveAlbum([FromRoute] string id)
         {
@@ -133,6 +141,7 @@ namespace Wave.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}/tracks")]
         public async Task<IActionResult> GetTracks([FromRoute] string id)
         {
@@ -151,6 +160,7 @@ namespace Wave.Controllers
             return Ok(songs);
         }
 
+        [Authorize(Policy = "write:admin")]
         [HttpPost("{id}/tracks")]
         public async Task<IActionResult> AddTrack([FromRoute] string id, [FromBody] CreateTrackDto dto)
         {
@@ -163,17 +173,27 @@ namespace Wave.Controllers
                 return NotFound();
             if (album.Artist.ApplicationUserId != this.User.Identity.Name)
                 return Forbid();
+
             var albumTracks = album.Tracks
                 .Where(q => q.DiscNumber == dto.DiscNumber)
                 .OrderBy(q => q.NumberOf)
                 .ToList();
 
-            // add
+            var track = _mapper.Map<CreateTrackDto, Track>(dto);
+            track.AlbumId = id;
+            await _dbContext.Tracks.AddAsync(track);
+            if (dto.NumberOf >= albumTracks.Count)
+                albumTracks.Add(track);
+            else
+                albumTracks.Insert(dto.NumberOf, track);
+
+            albumTracks.Renumber();
 
             await _dbContext.SaveChangesAsync();
             return Ok(albumTracks.Select(q => _mapper.Map<Track, TrackDto>(q)));
         }
 
+        [Authorize(Policy = "modify:admin")]
         [HttpPut("{id}/tracks")]
         public async Task<IActionResult> ModifyTrack([FromRoute] string id, [FromBody] TrackDto dto)
         {           
@@ -186,6 +206,7 @@ namespace Wave.Controllers
                 return NotFound();
             if (track.Album.Artist.ApplicationUserId != this.User.Identity.Name)
                 return Forbid();
+
             track.Title = dto.Title;
             track.IsExplicit = dto.IsExplicit;
 
@@ -193,6 +214,7 @@ namespace Wave.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "remove:admin")]
         [HttpDelete("{id}/tracks/{sId}")]
         public async Task<IActionResult> RemoveTrack([FromRoute] string id, [FromRoute] string sId)
         {
@@ -205,6 +227,7 @@ namespace Wave.Controllers
                 return Ok();
             if (track.Album.Artist.ApplicationUserId != this.User.Identity.Name)
                 return Forbid();
+
             var albumTracks = await _dbContext.Tracks
                 .Where(q => q.AlbumId == track.AlbumId && q.DiscNumber == track.DiscNumber)
                 .OrderBy(q => q.NumberOf)
@@ -217,6 +240,7 @@ namespace Wave.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "write:admin")]
         [HttpPost("{id}/images")]
         [DisableRequestSizeLimit]
         public async Task<IActionResult> UploadAlbumImage([FromRoute] string id, IFormFile file)
@@ -230,7 +254,12 @@ namespace Wave.Controllers
 
             var album = await _dbContext.Albums
                 .Include(q => q.Image)
+                .Include(q => q.Artist)
                 .FirstOrDefaultAsync(q => q.Id == id);
+
+            if (album.Artist.ApplicationUserId != this.User.Identity.Name)
+                return Forbid();
+
             if (album.Image != null)
                 _dbContext.AlbumImages.Remove(album.Image);
 
@@ -252,15 +281,19 @@ namespace Wave.Controllers
             return Ok(_mapper.Map<ImageDto>(img));
         }
 
+        [Authorize(Policy = "remove:admin")]
         [HttpDelete("{id}/images/{sId}")]
         public async Task<IActionResult> RemoveAlbumImage(string id, string sId)
         {
             var album = await _dbContext.Albums
                 .Include(q => q.Image)
+                .Include(q => q.Artist)
                 .FirstOrDefaultAsync(q => q.Id == id);
             if (album is null)
                 return BadRequest();
-    
+            if (album.Artist.ApplicationUserId != this.User.Identity.Name)
+                return Forbid();
+
             if (album.Image?.Id == sId)
             {
                 _dbContext.AlbumImages.Remove(album.Image);
@@ -270,6 +303,7 @@ namespace Wave.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "write:admin")]
         [HttpPost("{id}/track/{sId}")]
         [DisableRequestSizeLimit]
         public async Task<IActionResult> UploadTrack(string id, string sId, IFormFile file)
@@ -338,6 +372,7 @@ namespace Wave.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "remove:admin")]
         [HttpDelete("{id}/track/{sId}")]
         public async Task<IActionResult> RemoveTrackFile(string id, string sId)
         {
@@ -355,6 +390,7 @@ namespace Wave.Controllers
                 return Forbid();
             if (track.TrackFile is null)
                 return Ok();
+
             _dbContext.Remove(track.TrackFile);
             await _dbContext.SaveChangesAsync();
             return Ok();

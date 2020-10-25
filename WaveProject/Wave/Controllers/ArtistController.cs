@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,7 @@ using Wave.Models;
 
 namespace Wave.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
@@ -38,6 +40,7 @@ namespace Wave.Controllers
             _config = config ?? throw new NullReferenceException();
         }
 
+        [Authorize(Policy = "read:admin")]
         [HttpGet]
         public async Task<IActionResult> GetArtists([FromQuery] int from = 0, [FromQuery] int take = 50)
         {
@@ -53,6 +56,7 @@ namespace Wave.Controllers
             return Ok(artists);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetArtist([FromRoute] string id)
         {
@@ -66,6 +70,7 @@ namespace Wave.Controllers
             return Ok(artist);
         }
 
+        [Authorize(Policy = "write:admin")]
         [HttpPost]
         public async Task<IActionResult> CreateArtist([FromBody] CreateArtistDto dto)
         {
@@ -76,6 +81,7 @@ namespace Wave.Controllers
             return Ok(_mapper.Map<Artist, ArtistDto>(artist));
         }
 
+        [Authorize(Policy = "modify:admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> ModifyArtist(string id, [FromBody] ArtistDto dto)
         {
@@ -94,6 +100,7 @@ namespace Wave.Controllers
             return Ok(_mapper.Map<Artist, ArtistDto>(artist));
         }
 
+        [Authorize(Policy = "remove:admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> RemoveArtist(string id)
         {
@@ -111,11 +118,13 @@ namespace Wave.Controllers
                 return Ok();
             if (artist.ApplicationUserId != this.User.Identity.Name)
                 return Forbid();
+
             _dbContext.Artists.Remove(artist);
             await _dbContext.SaveChangesAsync();
             return Ok();
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}/top")]
         public async Task<IActionResult> GetTopTracks([FromRoute] string id)
         {
@@ -132,6 +141,7 @@ namespace Wave.Controllers
             return Ok(tracks);
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}/albums")]
         public async Task<IActionResult> GetAlbums(string id)
         {
@@ -152,6 +162,7 @@ namespace Wave.Controllers
             return Ok(albums);
         }
 
+        [Authorize(Policy = "write:admin")]
         [HttpPost("{id}/images")]
         [DisableRequestSizeLimit]
         public async Task<IActionResult> UploadArtistImage([FromRoute] string id, IFormFile file)
@@ -166,6 +177,9 @@ namespace Wave.Controllers
             var artist = await _dbContext.Artists
                 .Include(q => q.Image)
                 .FirstOrDefaultAsync(q => q.Id == id);
+            if (artist.ApplicationUserId != this.User.Identity.Name)
+                return Forbid();
+
             if (artist.Image != null)
                 _dbContext.ArtistImages.Remove(artist.Image);
 
@@ -187,6 +201,7 @@ namespace Wave.Controllers
             return Ok(_mapper.Map<ImageDto>(img));
         }
 
+        [Authorize(Policy = "remove:admin")]
         [HttpDelete("{id}/images/{sId}")]
         public async Task<IActionResult> RemoveArtistImage(string id, string sId)
         {
@@ -195,8 +210,10 @@ namespace Wave.Controllers
                 .FirstOrDefaultAsync(q => q.Id == id);
             if (artist is null)
                 return BadRequest();
+            if (artist.ApplicationUserId != this.User.Identity.Name)
+                return Forbid();
 
-            if(artist.Image?.Id == sId)
+            if (artist.Image?.Id == sId)
             {
                 _dbContext.ArtistImages.Remove(artist.Image);
                 await _dbContext.SaveChangesAsync();

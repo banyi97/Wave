@@ -5,17 +5,21 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Wave.Database;
 using Wave.Dtos;
+using Wave.Hubs;
 using Wave.Models;
 using Wave.Services;
 
 namespace Wave.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
@@ -25,19 +29,23 @@ namespace Wave.Controllers
         private readonly IMapper _mapper;
         private readonly BlobServiceClient _blobService;
         private readonly IOptions<AzureBlobConfig> _config;
+        private readonly IHubContext<NotificationHub> _hub;
 
         public PlaylistController(
             ApplicationDbContext dbContext,
             IMapper mapper,
             BlobServiceClient blobService,
-            IOptions<AzureBlobConfig> config)
+            IOptions<AzureBlobConfig> config,
+            IHubContext<NotificationHub> hub)
         {
             _dbContext = dbContext ?? throw new NullReferenceException();
             _mapper = mapper ?? throw new NullReferenceException();
             _blobService = blobService ?? throw new NullReferenceException();
             _config = config ?? throw new NullReferenceException();
+            _hub = hub ?? throw new NullReferenceException();
         }
 
+        [Authorize("read:admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllPlaylist([FromQuery] int from = 0, [FromQuery] int take = 50)
         {
@@ -52,6 +60,7 @@ namespace Wave.Controllers
             return Ok(playlists);
         }
 
+        [Authorize]
         [HttpGet("me")]
         public async Task<IActionResult> GetMyAllPlaylist()
         {
@@ -62,10 +71,11 @@ namespace Wave.Controllers
                     .Select(q => _mapper.Map<Playlist, PlaylistDto>(q))
                     .ToListAsync();
             foreach (var item in playlists)
-                item.IsMy = true;
+                item.IsMy = true; // drag & drop
             return Ok(playlists);
         }
 
+        [AllowAnonymous]
         [HttpGet("user/{id}")]
         public async Task<IActionResult> GetUserAllPublicPlaylist(string id)
         {
@@ -77,6 +87,7 @@ namespace Wave.Controllers
             return Ok(playlists);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreatePlaylist([FromBody] CreatePlaylistDto dto)
         {
@@ -93,9 +104,11 @@ namespace Wave.Controllers
             playlist.NumberOf = playlists.LastOrDefault() == null ? 0 : playlists.Last().NumberOf + 1;
             await _dbContext.Playlists.AddAsync(playlist);
             await _dbContext.SaveChangesAsync();
+            await _hub.Clients.Group(this.User.Identity.Name).SendCoreAsync("createdPlaylist", new object[] { _mapper.Map<Playlist, PlaylistDto>(playlist) });
             return Ok(_mapper.Map<Playlist, PlaylistDto>(playlist));
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> ReorderPlaylist(string id, [FromQuery] int from, [FromQuery] int to)
         {
@@ -107,6 +120,9 @@ namespace Wave.Controllers
             var playlist = playlists.SingleOrDefault(q => q.Id == id);
             if (playlist is null)
                 return NotFound();
+            if (playlist.ApplicationUserId != this.User.Identity.Name)
+                return Forbid();
+
             if (playlist.NumberOf != from || !(to >= 0 && to < playlists.Count))
                 return BadRequest();
             if (playlist.NumberOf == to)
@@ -123,9 +139,11 @@ namespace Wave.Controllers
                 return BadRequest();
             }
             await _dbContext.SaveChangesAsync();
+            await _hub.Clients.Group(this.User.Identity.Name).SendCoreAsync("reorderPlaylist", new object[] { new ReorderDto { Id = playlist.Id, From = from, To = to } });
             return Ok();
         }
-
+        
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPlaylist(string id)
         {
@@ -157,6 +175,7 @@ namespace Wave.Controllers
             return Forbid();
         }
 
+        [Authorize]
         [HttpPatch("{id}/rename")]
         public async Task<IActionResult> RenamePlaylist(string id, [FromBody] PlaylistDto dto)
         {
@@ -169,9 +188,11 @@ namespace Wave.Controllers
             playlist.Title = dto.Title;
 
             await _dbContext.SaveChangesAsync();
+            await _hub.Clients.Group(this.User.Identity.Name).SendCoreAsync("renamedPlaylist", new object[] { _mapper.Map<Playlist, PlaylistDto>(playlist) });
             return Ok(_mapper.Map<Playlist, PlaylistDto>(playlist));
         }
 
+        [Authorize]
         [HttpPatch("{id}/publis")]
         public async Task<IActionResult> MakePublicPlaylist(string id, [FromBody] PlaylistDto dto)
         {
@@ -180,11 +201,14 @@ namespace Wave.Controllers
                 return NotFound();
             if (playlist.ApplicationUserId != this.User.Identity.Name)
                 return Forbid();
+
             playlist.IsPublic = dto.IsPublic;
             await _dbContext.SaveChangesAsync();
+            await _hub.Clients.Group(this.User.Identity.Name).SendCoreAsync("makePublic", new object[] { _mapper.Map<Playlist, PlaylistDto>(playlist) });
             return Ok(_mapper.Map<Playlist, PlaylistDto>(playlist));
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> RemovePlaylist(string id)
         {
@@ -205,9 +229,11 @@ namespace Wave.Controllers
             playlists.Renumber();
 
             await _dbContext.SaveChangesAsync();
+            await _hub.Clients.Group(this.User.Identity.Name).SendCoreAsync("removedPlaylist", new object[] { id });
             return Ok();
         }
 
+        [Authorize]
         [HttpPost("{id}/images")]
         [DisableRequestSizeLimit]
         public async Task<IActionResult> UploadPlaylistImage([FromRoute] string id, IFormFile file)
@@ -222,6 +248,9 @@ namespace Wave.Controllers
             var playlist = await _dbContext.Playlists
                 .Include(q => q.Image)
                 .FirstOrDefaultAsync(q => q.Id == id);
+            if (playlist.ApplicationUserId != this.User.Identity.Name)
+                return Forbid();
+
             if (playlist.Image != null)
                 _dbContext.PlaylistImages.Remove(playlist.Image);
 
@@ -243,6 +272,7 @@ namespace Wave.Controllers
             return Ok(_mapper.Map<ImageDto>(img));
         }
 
+        [Authorize]
         [HttpDelete("{id}/images/{sId}")]
         public async Task<IActionResult> RemovePlaylistImage(string id, string sId)
         {
@@ -251,6 +281,8 @@ namespace Wave.Controllers
                 .FirstOrDefaultAsync(q => q.Id == id);
             if (playlist is null)
                 return BadRequest();
+            if (playlist.ApplicationUserId != this.User.Identity.Name)
+                return Forbid();
 
             if (playlist.Image?.Id == sId)
             {
@@ -260,6 +292,7 @@ namespace Wave.Controllers
             return Ok();
         }
 
+        [Authorize]
         [HttpPost("{id}/{sId}")]
         public async Task<IActionResult> AddToPlaylist(string id, string sId)
         {
@@ -268,6 +301,7 @@ namespace Wave.Controllers
                 return NotFound();
             if (playlist.ApplicationUserId != this.User.Identity.Name)
                 return Forbid();
+
             var song = await _dbContext.Tracks.FindAsync(sId);
             if (song is null)
                 return NotFound();
@@ -287,9 +321,12 @@ namespace Wave.Controllers
             };
             await _dbContext.PlaylistElements.AddAsync(element);
             await _dbContext.SaveChangesAsync();
-            return Ok(_mapper.Map<PlaylistElement, PlaylistElementDto>(element));
+            var ret = _mapper.Map<PlaylistElement, PlaylistElementDto>(element);
+            await _hub.Clients.Group(this.User.Identity.Name).SendCoreAsync("addedToPlaylist", new object[] { ret });
+            return Ok(ret);
         }
 
+        [Authorize]
         [HttpPut("{id}/{sId}")]
         public async Task<IActionResult> ReOrderPlaylist(string id, string sId, [FromQuery] int next)
         {
@@ -319,6 +356,7 @@ namespace Wave.Controllers
             return Ok();
         }
 
+        [Authorize]
         [HttpDelete("{id}/{sId}")]
         public async Task<IActionResult> RemoveFromPlaylist(string id, string sId)
         {
@@ -341,6 +379,7 @@ namespace Wave.Controllers
             elements.Renumber();
 
             await _dbContext.SaveChangesAsync();
+            await _hub.Clients.Group(this.User.Identity.Name).SendCoreAsync("removedFromPlaylist", new object[] { new { id = element.PlayListId, sId = id } });
             return Ok();
         }
     }
