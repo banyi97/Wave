@@ -11,9 +11,14 @@ export class SignalRService {
         private ps: PlaylistService,
         private ep: EndpointService
         ){
+            console.log("signalr ctor")
+            this.auth.isAuthenticated$.subscribe(isAuth => {
+                console.log(isAuth)
+            })
             this.auth.getTokenSilently$().subscribe(token =>{
-                if(this.auth.loggedIn){
+                if(token){
                     this.startConnection(token)
+                    console.log("signalr")
                 }
                 else{
                     this.hubConnection.onclose(res => {
@@ -24,7 +29,7 @@ export class SignalRService {
         }
     private hubConnection: signalR.HubConnection
 
-    public startConnection = (token) => {
+    public startConnection = (token = "") => {
         this.hubConnection = 
             new signalR.HubConnectionBuilder()
                 .withUrl(this.ep.serverUri + '/notification', { accessTokenFactory: () => token })

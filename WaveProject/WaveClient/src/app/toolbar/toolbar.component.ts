@@ -12,4 +12,12 @@ export class ToolbarComponent {
     public auth: AuthService,
     public location: Location
     ) {}
+
+    public login(){
+
+    }
+
+    public logout(){
+        
+    }
 }

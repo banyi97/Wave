@@ -1,0 +1,8 @@
+<button mat-button (click)="createArtist()">Create new</button>
+<h3>Artists:</h3>
+
+<mat-nav-list >
+  <mat-list-item *ngFor="let artist of artists" [routerLink]='["/artist/" + artist.id]'>
+    <a>{{artist.name}}</a>
+  </mat-list-item>
+</mat-nav-list>

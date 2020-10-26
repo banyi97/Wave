@@ -22,6 +22,7 @@ using Azure.Storage.Blobs.Models;
 using Wave.Models;
 using Wave.Interfaces;
 using Wave.Hubs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Wave
 {
@@ -43,6 +44,8 @@ namespace Wave
 
             services.AddSignalR();
 
+            services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -55,6 +58,21 @@ namespace Wave
             {
                 options.Authority = authority;
                 options.Audience = Configuration["Auth0ApiConfig:Identifier"];
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notification"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
+
                 options.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
                 options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
             });
@@ -109,19 +127,20 @@ namespace Wave
 
             app.UseHttpsRedirection();
 
-            app.UseRouting();
-
             app.UseSwagger();
             app.UseSwaggerUI(sw =>
             {
                 sw.SwaggerEndpoint("/swagger/v1/swagger.json", "Wave API V1");
             });
 
+            app.UseRouting();
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers().RequireAuthorization();
+                endpoints.MapControllers();
                 endpoints.MapHub<NotificationHub>("/notification");
             });
         }

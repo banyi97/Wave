@@ -1,0 +1,18 @@
+<h2 mat-dialog-title>{{data.title}}</h2>
+<mat-dialog-content class="mat-typography">
+  <form [formGroup]="imageFrom">
+    <div class="col">
+        <div>
+            <mat-label class="row">Image</mat-label>
+            <input class="row" (change)="handleFileInput($event.target.files)" type="file">
+            <div class="row" *ngIf="img">
+                <img height="400" width="400" [src]="img" alt="">
+            </div>
+        </div>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button (click)="onSubmit()" cdkFocusInitial>Upload</button>
+</mat-dialog-actions>

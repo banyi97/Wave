@@ -7,5 +7,6 @@ namespace Wave.Dtos
 {
     public class CreatePlaylistDto
     {
+        public string Title { get; set; }
     }
 }

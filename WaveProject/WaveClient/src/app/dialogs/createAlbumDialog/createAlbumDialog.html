@@ -1,0 +1,163 @@
+<h2 mat-dialog-title>Create new artist</h2>
+<mat-dialog-content class="mat-typography">
+
+<div class="container-fluid">
+  <mat-horizontal-stepper [linear]="true" #stepper (selectionChange)="selectionChange($event)">
+
+    <mat-step [stepControl]="albumForm">
+      <form [formGroup]="albumForm">
+        <ng-template matStepLabel>Album data</ng-template>
+        <div class="col">
+          <div>
+            <mat-form-field>
+              <mat-label>Label</mat-label>
+              <input matInput placeholder="Label of the album" formControlName="label" required>
+            </mat-form-field>
+          </div>
+          <div>
+            <div>
+              <mat-radio-group class="row" formControlName="releaseDatePrecision">
+                <mat-radio-button class="col" value="0">Day</mat-radio-button>
+                <mat-radio-button class="col" value="1">Month</mat-radio-button>
+                <mat-radio-button class="col" value="2">Year</mat-radio-button>
+              </mat-radio-group>
+            </div>
+           <div>
+
+            <mat-form-field appearance="fill">
+              <mat-label>Choose the release date</mat-label>
+              <input matInput [matDatepicker]="releasePicker" formControlName="releaseDate">
+              <mat-datepicker-toggle matSuffix [for]="releasePicker"></mat-datepicker-toggle>
+              <mat-datepicker #releasePicker></mat-datepicker>
+            </mat-form-field>
+           </div>
+          </div>
+
+          <div>
+            <mat-form-field>
+              <input matInput [ngxMatDatetimePicker]="picker" placeholder="Available from" formControlName="availableFrom">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <ngx-mat-datetime-picker #picker >
+              </ngx-mat-datetime-picker>
+           </mat-form-field>
+          </div>
+
+          <div>
+            <mat-form-field appearance="fill">
+              <mat-label>Album type</mat-label>
+              <mat-select formControlName="albumType">
+                <mat-option *ngFor="let type of albumTypes" [value]="type.value">
+                  {{type.viewValue}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div>
+            <mat-label>Image</mat-label>
+            <br>
+            <input (change)="handleFileInput($event.target.files)" accept="image/*" type="file">
+            <div *ngIf="img">
+                <img height="200" width="200" [src]="img" alt="">
+            </div>
+          </div>
+
+          <div>
+            <button mat-button matStepperNext>Next</button>
+          </div>
+        </div>
+      </form>
+    </mat-step>
+
+    <mat-step [stepControl]="trackForm">
+      <form [formGroup]="trackForm">
+        <ng-template matStepLabel>Tracks</ng-template>
+
+        <div class="col" cdkDropList (cdkDropListDropped)="drop($event)">
+          <ng-container formArrayName="tracks" >
+            <div *ngFor="let _ of tracks.controls; index as i" >
+              <ng-container [formGroupName]="i" >
+                <div class="row" cdkDrag>
+                  <div class="col">
+                    <mat-form-field>
+                      <mat-label>Title</mat-label>
+                      <input matInput required formControlName="title">
+                    </mat-form-field>
+                  </div>
+                  <div class="col">
+                    <mat-checkbox formControlName="isExplicit">Explicit</mat-checkbox>
+                  </div>
+                  <div class="col">
+                    <input required (change)="handleTrackFile($event.target.files, i)" type="file">
+                  </div>
+                  <div class="col">
+                    <button mat-button (click)="removeTrack(i)">Remove</button>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <div>
+            <button mat-button (click)="addTrack()">Add track</button>
+          </div>
+          <div>
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-button matStepperNext>Next</button>
+          </div>
+        </div>
+      </form>
+    </mat-step>
+
+    <mat-step>
+      <ng-template matStepLabel>Done</ng-template>
+      <div class="col">
+        <div class="row">
+          <div class="col">
+            <div *ngIf="img">
+              <img height="200" width="200" [src]="img" alt="">
+            </div>
+          </div>
+          <div class="col">
+            <div>
+              <b>{{f.label.value}}</b>
+            </div>
+          </div>
+        </div>
+        <div>
+
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Title</th>
+                <th scope="col">Explicit</th>
+                <th scope="col">Duration</th>
+              </tr>
+            </thead>
+            <mat-spinner *ngIf="trackIsNull()"></mat-spinner>
+            <tbody *ngIf="!trackIsNull()">
+              <tr *ngFor="let track of track$ | async; index as i">
+                <th scope="row">{{ i + 1 }}</th>             
+                <td>{{track.title}}</td>
+                <td>{{track.isExplicit }}</td>
+                <td>{{track.duration}}</td>
+              </tr>
+              </tbody>
+          </table>
+        </div>
+      </div>
+      <button mat-button (click)="onSubmit()">Create</button>
+      <div>
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button (click)="stepper.reset()">Reset</button>
+      </div>
+    </mat-step>
+
+  </mat-horizontal-stepper>
+</div>
+  
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+</mat-dialog-actions>

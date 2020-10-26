@@ -16,6 +16,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ContextMenuModule } from 'ngx-contextmenu';
+import { NgxMatDatetimePickerModule, NgxMatNativeDateModule } from '@angular-material-components/datetime-picker';
 
 import { DurationConvertPipe, DurationSecConvertPipe } from './services/durationConvertPipe';
 
@@ -33,6 +34,14 @@ import { AlbumViewComponent } from './view/album/albumview.component'
 import { TrackViewComponent } from './view/track/trackview.component'
 import { PlaylistViewComponent } from './view/playlist/playlistview.component'
 import { PlayerComponent } from './player/player.component'
+
+import { AdminArtistsComponent } from './admin/artists/artists.component';
+import { AdminArtistComponent } from './admin/artist/artist.component';
+import { AdminAlbumComponent } from './admin/album/album.component';
+import { CreateArtistDialog } from './dialogs/createArtistDialog/createArtistDialog'
+import { CreateAlbumDialog } from './dialogs/createAlbumDialog/createAlbumDialog'
+import { DefaultDialog } from './dialogs/defaultDialog/defaultDialog'
+import { SetNewImageDialog } from './dialogs/setNewImageDialog/setNewImageDialog'
 
 import { PlaylistDialog } from './dialogs/playlistDialog/playlistDialog'
 import { AddToPlaylistDialog } from './dialogs/addToPlaylistDialog/addToPlaylistDialog'
@@ -58,6 +67,13 @@ import { AddToPlaylistDialog } from './dialogs/addToPlaylistDialog/addToPlaylist
     PlaylistDialog,
     AddToPlaylistDialog,
     PlayerComponent,
+    AdminArtistsComponent,
+    AdminArtistComponent,
+    AdminAlbumComponent,
+    CreateArtistDialog,
+    CreateAlbumDialog,
+    DefaultDialog,
+    SetNewImageDialog
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -65,6 +81,8 @@ import { AddToPlaylistDialog } from './dialogs/addToPlaylistDialog/addToPlaylist
     ContextMenuModule.forRoot({ useBootstrap4: true }),
     NgbModule,
     FormsModule,
+    NgxMatNativeDateModule,
+    NgxMatDatetimePickerModule,
     MaterialModule,
     ReactiveFormsModule,
     RouterModule.forRoot([
@@ -76,6 +94,9 @@ import { AddToPlaylistDialog } from './dialogs/addToPlaylistDialog/addToPlaylist
       { path: 'artist/:id', component: ArtistComponent },
       { path: 'album/:id', component: AlbumComponent },
       { path: 'playlist/:id', component: PlaylistComponent },
+      { path: 'admin/artist/:id', component: AdminArtistComponent, canActivate: [AuthGuard] },
+      { path: 'admin/artists', component: AdminArtistsComponent, canActivate: [AuthGuard] },
+      { path: 'admin/album/:id', component: AdminAlbumComponent, canActivate: [AuthGuard] },
       { path: '**', component: NotfoundComponent }
     ]),
     BrowserAnimationsModule

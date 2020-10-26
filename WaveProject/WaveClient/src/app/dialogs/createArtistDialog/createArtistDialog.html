@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>Create new artist</h2>
+<mat-dialog-content class="mat-typography">
+  <form [formGroup]="artistForm">
+    <div class="col">
+       <div class="row">
+            <mat-form-field>
+                <mat-label>Artist Name</mat-label>
+                <input formControlName="name" matInput placeholder="Name of the artist">
+            </mat-form-field>
+        </div>
+        <div class="row">
+            <mat-form-field>
+                <mat-label>Description</mat-label>
+                <textarea formControlName="description" matInput placeholder="Description of the artist"></textarea>
+            </mat-form-field>
+        </div>
+        <div class="col">
+            <mat-label class="row">Image</mat-label>
+            <input class="row" (change)="handleFileInput($event.target.files)" type="file">
+            <div class="row" *ngIf="img">
+                <img height="400" width="400" [src]="img" alt="">
+            </div>
+        </div>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button (click)="onSubmit()" cdkFocusInitial>Create</button>
+</mat-dialog-actions>
