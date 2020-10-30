@@ -118,7 +118,7 @@ export class AdminAlbumComponent implements OnInit{
     this.http.put<any>(this.ep.albumUri(this.id), {
       label: this.f.label.value
     }).subscribe(resp => { 
-      this.album.label = resp.label // only the label change can change now in controller
+      this.album.label = resp.label 
 
       this.isModify = false
     }, error => console.log(error))
@@ -136,7 +136,7 @@ export class AdminAlbumComponent implements OnInit{
     dialogRef.afterClosed().subscribe(res => {
       if(res){
         this.http.delete(this.ep.artistUri(this.id)).subscribe(resp =>{
-          this.router.navigate([`/artist/${this.album.artistId}`])
+          this.router.navigate([`/admin/artist/${this.album.artistId}`])
         }, error => {
           console.log(error)
         })
@@ -148,7 +148,7 @@ export class AdminAlbumComponent implements OnInit{
     const dialogRef = this.dialog.open(CreateAlbumDialog);
     dialogRef.afterClosed().subscribe(id => {
       if(id){
-        this.router.navigate([`/artist/${id}`])
+        this.router.navigate([`/admin/artist/${id}`])
       }
     })
   }

@@ -27,7 +27,7 @@ export class AdminArtistsComponent {
     const dialogRef = this.dialog.open(CreateArtistDialog);
     dialogRef.afterClosed().subscribe(id => {
       if(id){
-        this.router.navigate([`/artist/${id}`])
+        this.router.navigate([`/admin/artist/${id}`])
       }
     })
   }

@@ -51,7 +51,7 @@ export class CreateAlbumDialog implements OnInit {
 
     private trackSubject$: BehaviorSubject<TrackElement[]|null> = new BehaviorSubject<TrackElement[]|null>(null)
     public track$: Observable<TrackElement[]|null> = this.trackSubject$.asObservable()
-
+    public artistId = "id"
     albumTypes = [
       {value: '0', viewValue: 'Album'},
       {value: '1', viewValue: 'Single'},
@@ -166,14 +166,14 @@ export class CreateAlbumDialog implements OnInit {
         console.log(resp)
         let form = new FormData();
         form.append("file", this.f.file.value)
-        this.http.post<any>(this.ep.uploadPic(resp.id, 'album'), form).subscribe(resp =>{
+        this.http.post<any>(this.ep.albumImageUpload(resp.id), form).subscribe(resp =>{
           console.log(resp)
         }, error => console.log(error))
         for(let i = 0; i < this.tracks.length; i++){
           let form = new FormData();
           const group = this.tracks.controls[i] as FormGroup
           form.append("file", group.controls.file.value)
-          this.http.post(this.ep.uploadSong(resp.tracks[i].id), form).subscribe(resp => {
+          this.http.post(this.ep.albumTrack(this.artistId, resp.tracks[i].id), form).subscribe(resp => {
             console.log("uploaded")
             console.log(resp)
           }, error => console.log(error))

@@ -325,8 +325,8 @@ namespace Wave.Controllers
                 return NotFound();
             if (track.Album.Artist.ApplicationUserId != this.User.Identity.Name)
                 return Forbid();
-            if (track.Album.Id != id)
-                return BadRequest();
+            //if (track.Album.Id != id)
+            //    return BadRequest();
 
             var trackFile = track.TrackFile ?? new TrackFile();
             track.TrackFile = trackFile;

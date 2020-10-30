@@ -63,7 +63,7 @@
     <mat-tab label="Albums"> 
         <button mat-button (click)="createAlbum()">Create new album</button>
         <mat-nav-list >
-            <mat-list-item *ngFor="let album of albums" [routerLink]='["/album/" + album.id]'>
+            <mat-list-item *ngFor="let album of albums" [routerLink]='["/admin/album/" + album.id]'>
               <a>{{album.label}} - {{album.releaseDate | date : 'y'}}</a>
             </mat-list-item>
         </mat-nav-list>

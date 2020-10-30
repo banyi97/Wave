@@ -53,9 +53,8 @@ namespace Wave.Controllers
             if (!await blob.ExistsAsync())
                 return NotFound();
             await using var stream = new MemoryStream();
-            await using var str = await blob.OpenReadAsync();
             using var resp = await blob.DownloadToAsync(stream);
-            return File(str, resp.Headers.ContentType, true);
+            return File(stream.ToArray(), resp.Headers.ContentType, true);
         }
 
         [Authorize]

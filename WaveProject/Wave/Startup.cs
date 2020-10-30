@@ -78,6 +78,7 @@ namespace Wave
             });
 
             services.Configure<AzureBlobConfig>(Configuration.GetSection("AzureBlobConfig"));
+            services.Configure<Auth0ApiConfig>(Configuration.GetSection("Auth0ApiConfig"));
 
             var connString = Configuration["AzureBlobConfig:ConnectionString"];
 

@@ -14,14 +14,14 @@ namespace Wave.Services
         {
             if (source.TrackFile is null)
                 return null;
-            return $"https://localhost:44363/api/Player/{source.Id}";
+            return $"/api/Player/{source.Id}";
         }
 
         public string Resolve(Track source, PlaylistTrackDto destination, string destMember, ResolutionContext context)
         {
             if (source.TrackFile is null)
                 return null;
-            return $"https://localhost:44363/api/Player/{source.Id}";
+            return $"/api/Player/{source.Id}";
         }
     }
 }

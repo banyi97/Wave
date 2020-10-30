@@ -90,7 +90,7 @@ export class AdminArtistComponent implements OnInit{
     dialogRef.afterClosed().subscribe(res => {
       if(res){
         this.http.delete(this.ep.artistUri(this.id)).subscribe(resp =>{
-          this.router.navigate(['/artists'])
+          this.router.navigate(['/admin/artists'])
         }, error =>{
           console.log(error)
         })
@@ -115,7 +115,7 @@ export class AdminArtistComponent implements OnInit{
     const dialogRef = this.dialog.open(CreateAlbumDialog, {data: {id: this.id}});
     dialogRef.afterClosed().subscribe(id => {
       if(id){
-        this.router.navigate([`/artist/${id}`])
+        this.router.navigate([`/admin/artist/${id}`])
       }
     })
   }

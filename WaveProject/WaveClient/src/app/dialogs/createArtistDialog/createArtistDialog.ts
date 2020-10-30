@@ -49,7 +49,7 @@ export class CreateArtistDialog implements OnInit {
         if(resp.id){
           let form = new FormData();
           form.append("file", this.f.file.value)
-          this.http.post(this.ep.uploadPic(resp.id, "artist"), form).subscribe(resp => {
+          this.http.post(this.ep.artistImageUpload(resp.id), form).subscribe(resp => {
 
           }, error => console.log(error))
           this.dialogRef.close(resp.id)

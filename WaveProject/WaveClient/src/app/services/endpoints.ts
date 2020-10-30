@@ -32,6 +32,15 @@ export class EndpointService {
   albumRemoveExtraAuthorFromSong(id: string, sId: string) {
     return `${this.serverUri}/api/Album/track/${id}/remove/${sId}`
   }
+  albumImageUpload(id: string){
+    return `${this.serverUri}/api/Album/${id}/images`
+  }
+  albumImageRemove(id: string, sId: string){
+    return `${this.serverUri}/api/Album/${id}/images/${sId}`
+  }
+  albumTrack(id: string, sId: string){
+    return `${this.serverUri}/api/Album/${id}/track/${sId}`
+  }
 
   // ### Artist 
   artistUri(id: string = null) {
@@ -45,6 +54,12 @@ export class EndpointService {
   }
   artistAlbums(id: string) {
     return `${this.serverUri}/api/Artist/${id}/albums`
+  }
+  artistImageUpload(id: string){
+    return `${this.serverUri}/api/Artist/${id}/images`
+  }
+  artistImageRemove(id: string, sId: string){
+    return `${this.serverUri}/api/Artist/${id}/images/${sId}`
   }
 
   // ### Player
@@ -80,6 +95,12 @@ export class EndpointService {
   }
   playlistRemoveFromTrack(id: string) { // DELETE
     return `${this.serverUri}/api/Playlist/element/${id}`;
+  }
+  playlistImageUpload(id: string){
+    return `${this.serverUri}/api/Playlist/${id}/images`
+  }
+  playlistImageRemove(id: string, sId: string){
+    return `${this.serverUri}/api/Playlist/${id}/images/${sId}`
   }
 
   // ### Search
