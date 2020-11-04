@@ -48,10 +48,12 @@ namespace Wave
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration(x =>
-                {
-                    //x.add
-                })
+                //.ConfigureAppConfiguration((hostingContext, config) =>
+                //{
+                //    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                //    config.AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true);
+                //    config.AddEnvironmentVariables();
+                //})
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

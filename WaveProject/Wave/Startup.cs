@@ -37,7 +37,7 @@ namespace Wave
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {
+        {       
             services.AddControllers();
 
             services.AddAutoMapper(typeof(MapperConfig));
@@ -77,6 +77,7 @@ namespace Wave
                 options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
             });
 
+            services.AddOptions();
             services.Configure<AzureBlobConfig>(Configuration.GetSection("AzureBlobConfig"));
             services.Configure<Auth0ApiConfig>(Configuration.GetSection("Auth0ApiConfig"));
 

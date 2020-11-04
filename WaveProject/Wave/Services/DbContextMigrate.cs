@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,26 +25,28 @@ namespace Wave.Services
                 var logger = services.GetRequiredService<ILogger<TContext>>();
                 var context = services.GetService<TContext>();
                 var config = services.GetService<IConfiguration>();
-
-                var connection = new SqlConnection(config.GetConnectionString("DefaultConnection"));
-                var isConnected = false;
-                do
-                {
-                    try
-                    {
-                        connection.Open();
-                        isConnected = true;
-                    }
-                    catch (Exception) { }
-                    Thread.Sleep(5000);
-                } while (!isConnected);
-                connection.Close();
-                connection.Dispose();
+                //var res = context.Database.EnsureCreated();
+                //var connection = new SqlConnection(config.GetConnectionString("DefaultConnection"));
+                //var isConnected = false;
+                //do
+                //{
+                //    try
+                //    {
+                //        connection.Open();
+                //        isConnected = true;
+                //    }
+                //    catch (Exception ex) {
+                //        Log.Information(ex.Message);
+                //    }
+                //    Thread.Sleep(1000);
+                //} while (!isConnected);
+                //connection.Close();
+                //connection.Dispose();
 
                 try
                 {
                     logger.LogInformation($"Migrating database associated with context {typeof(TContext).Name}");
-                                      
+
                     context.Database.Migrate();
                 
                     logger.LogInformation($"Migrated database associated with context {typeof(TContext).Name}");
