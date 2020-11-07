@@ -18,43 +18,22 @@ namespace Wave.Services
     {
         public static IHost MigrateDbContext<TContext>(this IHost host) where TContext : DbContext
         {
-            //https://anduin.aiursoft.com/post/2019/12/14/auto-update-database-for-aspnet-core-with-entity-framework
-            using (var scope = host.Services.CreateScope())
+
+            using var scope = host.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            try
             {
-                var services = scope.ServiceProvider;
-                var logger = services.GetRequiredService<ILogger<TContext>>();
-                var context = services.GetService<TContext>();
-                var config = services.GetService<IConfiguration>();
-                //var res = context.Database.EnsureCreated();
-                //var connection = new SqlConnection(config.GetConnectionString("DefaultConnection"));
-                //var isConnected = false;
-                //do
-                //{
-                //    try
-                //    {
-                //        connection.Open();
-                //        isConnected = true;
-                //    }
-                //    catch (Exception ex) {
-                //        Log.Information(ex.Message);
-                //    }
-                //    Thread.Sleep(1000);
-                //} while (!isConnected);
-                //connection.Close();
-                //connection.Dispose();
-
-                try
+                var dbContext = services.GetRequiredService<TContext>();
+                if (dbContext.Database.IsSqlServer())
                 {
-                    logger.LogInformation($"Migrating database associated with context {typeof(TContext).Name}");
+                    dbContext.Database.Migrate();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Migration error");
 
-                    context.Database.Migrate();
-                
-                    logger.LogInformation($"Migrated database associated with context {typeof(TContext).Name}");
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, $"An error occurred while migrating the database used on context {typeof(TContext).Name}");
-                }
+                throw;
             }
 
             return host;

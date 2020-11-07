@@ -1,6 +1,17 @@
 version: '3.4'
 
 services:
+    db:
+        image: "mcr.microsoft.com/mssql/server:2017-CU21-ubuntu-16.04"
+        environment:
+            SA_PASSWORD: "1Secure*Password1"
+            ACCEPT_EULA: "Y"
+        ports:
+            - "1433:1433"
+    blob:
+        image: "mcr.microsoft.com/azure-storage/azurite:3.9.0"
+        ports:
+            - "10000:10000"
     wave:
         image: ${DOCKER_REGISTRY-}wave
         build:
@@ -9,19 +20,10 @@ services:
         depends_on:
             - db
             - blob
-        networks:
-            - wave-net
-    db:
-        image: "mcr.microsoft.com/mssql/server:2017-CU21-ubuntu-16.04"
         environment:
-            SA_PASSWORD: "nagyonerospassword"
-            ACCEPT_EULA: "Y"
-        networks:
-            - wave-net
-    blob:
-        image: "mcr.microsoft.com/azure-storage/azurite:3.8.0"
-        networks:
-            - wave-net
-networks:
-    wave-net:
-        driver: bridge
+            CONNECTIONSTRINGS__DEFAULTCONNECTION: "Server=db;Database=wave;User=sa;Password=1Secure*Password1;"
+            AUTH0APICONFIG__AUTHORITY: "https://banyi97.eu.auth0.com/"
+            AUTH0APICONFIG__IDENTIFIER: "https://waveapi"
+            AZUREBLOBCONFIG__CONNECTIONSTRING: "AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=blob:10000/devstoreaccount1;"
+            AZUREBLOBCONFIG__CONTAINERTRACK: "wavetrack"
+            AZUREBLOBCONFIG__CONTAINERIMG: "waveimg"
