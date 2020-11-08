@@ -38,10 +38,13 @@ import { PlayerComponent } from './player/player.component'
 import { AdminArtistsComponent } from './admin/artists/artists.component';
 import { AdminArtistComponent } from './admin/artist/artist.component';
 import { AdminAlbumComponent } from './admin/album/album.component';
+import { AdminUsersComponent } from './admin/users/users.component'
+
 import { CreateArtistDialog } from './dialogs/createArtistDialog/createArtistDialog'
 import { CreateAlbumDialog } from './dialogs/createAlbumDialog/createAlbumDialog'
 import { DefaultDialog } from './dialogs/defaultDialog/defaultDialog'
 import { SetNewImageDialog } from './dialogs/setNewImageDialog/setNewImageDialog'
+import { UserDialog } from './dialogs/userDialog/userDialog'
 
 import { PlaylistDialog } from './dialogs/playlistDialog/playlistDialog'
 import { AddToPlaylistDialog } from './dialogs/addToPlaylistDialog/addToPlaylistDialog'
@@ -73,7 +76,9 @@ import { AddToPlaylistDialog } from './dialogs/addToPlaylistDialog/addToPlaylist
     CreateArtistDialog,
     CreateAlbumDialog,
     DefaultDialog,
-    SetNewImageDialog
+    SetNewImageDialog,
+    AdminUsersComponent,
+    UserDialog
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -97,6 +102,7 @@ import { AddToPlaylistDialog } from './dialogs/addToPlaylistDialog/addToPlaylist
       { path: 'admin/artist/:id', component: AdminArtistComponent, canActivate: [AuthGuard] },
       { path: 'admin/artists', component: AdminArtistsComponent, canActivate: [AuthGuard] },
       { path: 'admin/album/:id', component: AdminAlbumComponent, canActivate: [AuthGuard] },
+      { path: 'admin/users', component: AdminUsersComponent, canActivate: [AuthGuard] },
       { path: '**', component: NotfoundComponent }
     ]),
     BrowserAnimationsModule

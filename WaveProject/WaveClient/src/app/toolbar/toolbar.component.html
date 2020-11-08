@@ -14,7 +14,8 @@
           <button mat-button id="dropdownBasic1" ngbDropdownToggle>{{profile.nickname}}</button>
           <div ngbDropdownMenu aria-labelledby="dropdownBasic1" class="col">
               <button ngbDropdownItem [routerLink]="['/profile']">Profile</button>
-              <button ngbDropdownItem [routerLink]="['/admin/artists']">Admin</button>
+              <button ngbDropdownItem [routerLink]="['/admin/users']">Users</button>
+              <button ngbDropdownItem [routerLink]="['/admin/artists']">Mananger</button>
               <button ngbDropdownItem (click)="auth.logout()">Log Out</button>
           </div>
       </div>

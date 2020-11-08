@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>"User setting"</h2>
+<mat-dialog-content class="mat-typography">
+  <div>
+    <div>
+      <h3>Roles</h3>
+      <mat-list>
+        <mat-list-item *ngFor="let role of roles"> 
+          <mat-checkbox [checked]="isElement(role.id)" (change)="roleChange(role.id)">{{role.name}}</mat-checkbox>
+        </mat-list-item>
+     </mat-list>
+     <button mat-button (click)="saveSettings()">Save</button>
+    </div>
+    <div>
+      {{data.isBlocked == true ? "User unblock" : "User block"}}
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close >Cancel</button>
+  <button mat-button (click)="saveSettings()">Save</button>
+</mat-dialog-actions>

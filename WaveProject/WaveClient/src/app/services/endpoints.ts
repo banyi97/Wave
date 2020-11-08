@@ -3,12 +3,6 @@ import { Injectable } from "@angular/core";
 @Injectable({ providedIn: "root" })
 export class EndpointService {
   constructor() {
-    // if (location.hostname === "localhost") {
-    //   this.serverUri = "https://localhost:44363";
-    // }
-    // else {
-    //   this.serverUri = "https://waveprojectapi.azurewebsites.net";
-    // }
   }
   serverUri: string = "";
  
@@ -127,4 +121,25 @@ export class EndpointService {
   uploadSong(id: string) {
     return `${this.serverUri}/api/Upload/track/${id}`
   }
+
+  // ### Admin
+  users(id: string = null) {
+    if(id){
+      return `${this.serverUri}/api/Admin/users/${id}`
+    }
+    return `${this.serverUri}/api/Admin/users`
+  }
+  roles(id: string = null){
+    if(id){
+      return `${this.serverUri}/api/Admin/roles/${id}`
+    }
+    return `${this.serverUri}/api/Admin/roles`
+  }
+  userRole(userId){
+    return `${this.serverUri}/api/Admin/users/${userId}/roles`
+  }
+  userRoleRemove(userId){
+    return `${this.serverUri}/api/Admin/users/${userId}/roles/removes`
+  }
+
 }

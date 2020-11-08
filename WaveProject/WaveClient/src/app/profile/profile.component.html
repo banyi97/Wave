@@ -1,7 +1,9 @@
-<pre *ngIf="auth.userProfile$ | async as profile">
+<div>
+  <pre *ngIf="auth.userProfile$ | async as profile">
     <code>{{ profile | json }}</code>
   </pre>
   <pre>
     Token: 
     <code>{{ jwttoken }}</code>
   </pre>
+</div>

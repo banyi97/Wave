@@ -35,7 +35,18 @@ namespace WaveApi.Controllers
             try
             {
                 var users = await _apiClient.Users.GetAllAsync(new GetUsersRequest(), new PaginationInfo(from, take));
-                return Ok(users);
+
+                return Ok(users.Select(user =>
+                {
+                    return new
+                    {
+                        position = from++,
+                        email = user.Email,
+                        fullName = user.FullName,
+                        isBlocked = user.Blocked,
+                        userId = user.UserId
+                    };
+                }));
             }
             catch (ErrorApiException e)
             {
@@ -51,7 +62,15 @@ namespace WaveApi.Controllers
             try
             {
                 var user = await _apiClient.Users.GetAsync(id);
-                return Ok(user);
+                return Ok(
+                     new
+                     {
+                         email = user.Email,
+                         fullName = user.FullName,
+                         isBlocked = user.Blocked,
+                         userId = user.UserId
+                     }
+                );
             }
             catch (ErrorApiException e)
             {
@@ -60,8 +79,24 @@ namespace WaveApi.Controllers
             }
         }
 
+        [Authorize(Policy = "read:admin")]
+        [HttpGet("users/{id}/roles")]
+        public async Task<IActionResult> GetUserRoles(string id, [FromQuery] int from = 0, [FromQuery] int take = 50)
+        {
+            try
+            {
+                var roles = await _apiClient.Users.GetRolesAsync(id, new PaginationInfo(from, take));
+                return Ok(roles);
+            }
+            catch (ErrorApiException e)
+            {
+                Log.Error(e, "Admin - AddRoleToUsers");
+                return BadRequest(e.Message);
+            }
+        }
+
         [Authorize(Policy = "write:admin")]
-        [HttpPost("users/{id}/role")]
+        [HttpPost("users/{id}/roles")]
         public async Task<IActionResult> AddRoleToUsers(string id, [FromBody] IdsDto dto)
         {
             try
@@ -76,8 +111,8 @@ namespace WaveApi.Controllers
             }
         }
 
-        [Authorize(Policy = "remove:admin")]
-        [HttpDelete("users/{id}/role")]
+        [Authorize(Policy = "write:admin")]
+        [HttpPost("users/{id}/roles/removes")]
         public async Task<IActionResult> RemoveRoleFromUsers(string id, [FromBody] IdsDto dto)
         {
             try
@@ -98,7 +133,7 @@ namespace WaveApi.Controllers
         {
             try
             {
-                var roles = await _apiClient.Roles.GetAllAsync(new Auth0.ManagementApi.Models.GetRolesRequest());
+                var roles = await _apiClient.Roles.GetAllAsync(new GetRolesRequest());
                 return Ok(roles);
             }
             catch (ErrorApiException e)
@@ -130,7 +165,7 @@ namespace WaveApi.Controllers
         {
             try
             {
-                var role = await _apiClient.Roles.CreateAsync(new Auth0.ManagementApi.Models.RoleCreateRequest { Name = dto.Name, Description = dto.Description });
+                var role = await _apiClient.Roles.CreateAsync(new RoleCreateRequest { Name = dto.Name, Description = dto.Description });
                 return Ok(role);
             }
             catch (ErrorApiException e)
@@ -146,7 +181,7 @@ namespace WaveApi.Controllers
         {
             try
             {
-                var role = await _apiClient.Roles.UpdateAsync(id, new Auth0.ManagementApi.Models.RoleUpdateRequest { Name = dto.Name, Description = dto.Description });
+                var role = await _apiClient.Roles.UpdateAsync(id, new RoleUpdateRequest { Name = dto.Name, Description = dto.Description });
                 return Ok(role);
             }
             catch (ErrorApiException e)
@@ -174,12 +209,12 @@ namespace WaveApi.Controllers
 
         [Authorize(Policy = "read:admin")]
         [HttpGet("roles/{id}/users")]
-        public async Task<IActionResult> GetUserWithRole(string id)
+        public async Task<IActionResult> GetUsersWithRole(string id)
         {
             try
             {
-                var res = await _apiClient.Roles.GetUsersAsync(id);
-                return Ok(res);
+                var users = await _apiClient.Roles.GetUsersAsync(id);
+                return Ok(users);
             }
             catch (ErrorApiException e)
             {
@@ -194,7 +229,7 @@ namespace WaveApi.Controllers
         {
             try
             {
-                var ret = await _apiClient.Roles.GetPermissionsAsync(id, new Auth0.ManagementApi.Paging.PaginationInfo());
+                var ret = await _apiClient.Roles.GetPermissionsAsync(id, new PaginationInfo());
                 return Ok(ret);
             }
             catch (ErrorApiException e)
@@ -263,8 +298,8 @@ namespace WaveApi.Controllers
             try
             {
                 var res = await _apiClient.ResourceServers.GetAsync(_config.Value.ApiId);
-                res.Scopes.Add(new Auth0.ManagementApi.Models.ResourceServerScope { Value = dto.Name, Description = dto.Description });
-                var val = await _apiClient.ResourceServers.UpdateAsync(_config.Value.ApiId, new Auth0.ManagementApi.Models.ResourceServerUpdateRequest { Scopes = res.Scopes });
+                res.Scopes.Add(new ResourceServerScope { Value = dto.Name, Description = dto.Description });
+                var val = await _apiClient.ResourceServers.UpdateAsync(_config.Value.ApiId, new ResourceServerUpdateRequest { Scopes = res.Scopes });
                 return Ok(val.Scopes);
             }
             catch (ErrorApiException e)
@@ -286,7 +321,7 @@ namespace WaveApi.Controllers
                     return Ok(res.Scopes);
                 scope.Value = dto.Name;
                 scope.Description = dto.Description;
-                var val = await _apiClient.ResourceServers.UpdateAsync(_config.Value.ApiId, new Auth0.ManagementApi.Models.ResourceServerUpdateRequest { Scopes = res.Scopes });
+                var val = await _apiClient.ResourceServers.UpdateAsync(_config.Value.ApiId, new ResourceServerUpdateRequest { Scopes = res.Scopes });
                 return Ok(val.Scopes);
             }
             catch (ErrorApiException e)
@@ -307,7 +342,7 @@ namespace WaveApi.Controllers
                 if (scope is null)
                     return Ok(res.Scopes);
                 res.Scopes = res.Scopes.Where(q => q.Value != value).ToList();
-                await _apiClient.ResourceServers.UpdateAsync(_config.Value.ApiId, new Auth0.ManagementApi.Models.ResourceServerUpdateRequest { Scopes = res.Scopes });
+                await _apiClient.ResourceServers.UpdateAsync(_config.Value.ApiId, new ResourceServerUpdateRequest { Scopes = res.Scopes });
                 return Ok();
             }
             catch (ErrorApiException e)
