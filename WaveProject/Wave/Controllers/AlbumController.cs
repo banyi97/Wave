@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -238,6 +239,15 @@ namespace Wave.Controllers
 
             await _dbContext.SaveChangesAsync();
             return Ok();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("{id}/images/{sId}")]
+        public async Task<IActionResult> GetImage([FromRoute] string id, [FromRoute] string sId)
+        {
+            var img = _blobService.GetBlobContainerClient(_config.Value.ContainerImg).GetBlobClient(sId);
+            var res = await img.DownloadAsync();
+            return File(res.Value.Content, res.Value.ContentType);
         }
 
         [Authorize(Policy = "write:admin")]

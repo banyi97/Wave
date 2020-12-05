@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { PlaylistService } from '../services/playlist';
 
 @Component({
@@ -6,12 +6,14 @@ import { PlaylistService } from '../services/playlist';
   templateUrl: './yourlib.component.html',
   styleUrls: ['./yourlib.component.css']
 })
-export class YourLibComponent {
+export class YourLibComponent implements OnInit {
   constructor(
     public ps: PlaylistService
   ){}
-
-  asd(){
+  ngOnInit(): void {
     this.ps.getPlaylists();
+    this.ps.playlists$
   }
+
+  public playlists = [];
 }

@@ -141,7 +141,7 @@
                 <th scope="row">{{ i + 1 }}</th>             
                 <td>{{track.title}}</td>
                 <td>{{track.isExplicit }}</td>
-                <td>{{track.duration}}</td>
+                <td>{{track.duration | durationSecConvert}}</td>
               </tr>
               </tbody>
           </table>

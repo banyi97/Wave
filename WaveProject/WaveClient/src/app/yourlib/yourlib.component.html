@@ -1,3 +1,6 @@
-<div>
-    
+<h3>Your playlists</h3>
+<div >
+    <div class="row">
+      <app-playlist-view class="mx-2 mt-2" *ngFor="let playlist of ps.playlists$ | async" [playlist]="playlist"></app-playlist-view>
+    </div>
 </div>

@@ -1,6 +1,8 @@
 import { Image } from "./image"
 import { Track } from "./track";
 
+export enum AlbumType { Album, Single, EP}
+
 export class Album {
   id: string;
   label: string;
@@ -10,7 +12,7 @@ export class Album {
   
   releaseDate: Date;
   releaseDatePrecision: string;
-  albumType: string;
+  albumType: AlbumType;
 
   image: Image;
   tracks: Array<Track>

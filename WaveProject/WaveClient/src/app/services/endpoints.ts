@@ -56,6 +56,16 @@ export class EndpointService {
     return `${this.serverUri}/api/Artist/${id}/images/${sId}`
   }
 
+  // ### Home
+
+  home() {
+    return `${this.serverUri}/api/Home`; 
+  }
+
+  yourLib(id: string) {
+    return `${this.serverUri}/api/Home/yourlib`; 
+  }
+
   // ### Player
 
   player(id: string) {

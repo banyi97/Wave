@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 
 import { EndpointService } from '../services/endpoints'
-import { Artist, Album, Track } from '../models'
+import { Artist, Album, Track, AlbumType } from '../models'
 import { ContextMenuComponent } from 'ngx-contextmenu';
 import { MenuActionService } from '../services/menuAction';
 import { PlayerService } from '../services/player';
@@ -21,10 +21,10 @@ export class ArtistComponent implements OnInit {
     private player: PlayerService
     ) { }
 
-  artist: Artist = null
-  topTracks: Array<Track> = [];
-  albums: Array<Album> = [];
-  singles: Array<Album> = [];
+  public artist: Artist = null
+  public topTracks: Array<Track> = [];
+  public albums: Array<Album> = [];
+  public singles: Array<Album> = [];
 
   @ViewChild("topTrackMenu", { static: false }) public topTrackMenu: ContextMenuComponent;
   public contextMenuActions
@@ -39,6 +39,7 @@ export class ArtistComponent implements OnInit {
       this.http.get<Artist>(this.ep.artistUri(id)).subscribe(
         data => {
           this.artist = data
+          console.log(data)
         },
         error => {
           console.log(error)
@@ -46,14 +47,17 @@ export class ArtistComponent implements OnInit {
       this.http.get<Array<Track>>(this.ep.artistTop(id)).subscribe(
         data => {
           this.topTracks = data
+          console.log(data)
         },
         error => {
           console.log(error)
         })
       this.http.get<Array<Album>>(this.ep.artistAlbums(id)).subscribe(
         data => {
-          this.albums = data.filter(q => q.albumType == 'album');
-          this.singles = data.filter(q => q.albumType == 'single');
+          console.log("albums")
+          console.log(data)
+          this.albums = data.filter(q => q.albumType == AlbumType.Album);
+          this.singles = data.filter(q => q.albumType == AlbumType.Single);
         },
         error => {
           console.log(error)

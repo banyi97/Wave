@@ -162,6 +162,15 @@ namespace Wave.Controllers
             return Ok(albums);
         }
 
+        [AllowAnonymous]
+        [HttpGet("{id}/images/{sId}")]
+        public async Task<IActionResult> GetImage([FromRoute] string id, [FromRoute] string sId)
+        {
+            var img = _blobService.GetBlobContainerClient(_config.Value.ContainerImg).GetBlobClient(sId);
+            var res = await img.DownloadAsync();
+            return File(res.Value.Content, res.Value.ContentType);
+        }
+
         [Authorize(Policy = "write:admin")]
         [HttpPost("{id}/images")]
         [DisableRequestSizeLimit]

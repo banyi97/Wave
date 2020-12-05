@@ -1,7 +1,7 @@
-<div class="container">
+<div class="container text-center">
     <a [routerLink]='["/album/" + album.id]'>
       <div (mouseenter)="mouseenter()" (mouseleave)="mouseleave()">
-        <img [src]="album.image != null ? album.image.uri : 'wave.jpg'" width="200" height="200" [ngClass]="{'onMouse': isHover}"/>
+        <img [src]="album.image != null ? album.image.uri : 'assets/img/sound-waves.svg'" width="200" height="200" [ngClass]="{'onMouse': isHover}"/>
       </div>
       <div>
         {{album.label}}
