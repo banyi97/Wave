@@ -1,0 +1,14 @@
+<body class="fullpage">
+  <mat-drawer-container class="drawer-full-cont"  >
+    <mat-drawer [mode]="flex.mode" [(opened)]="flex.sideBarIsOpen">
+      <app-nav-menu></app-nav-menu>
+    </mat-drawer>
+    <mat-drawer-content>
+      <app-toolbar></app-toolbar>
+      <div class="container-fluid">
+        <router-outlet></router-outlet>
+      </div>
+    </mat-drawer-content>
+  </mat-drawer-container>
+  <app-player *ngIf="player.actual$ | async"></app-player>
+</body>

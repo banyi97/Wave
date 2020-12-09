@@ -1,7 +1,7 @@
 <div class="container-fluid" *ngIf="player.actual$ | async as actual">
     <div class="row d-flex justify-content-center align-middle">
       <div class="col-3">
-        <div class="row pl-2 pt-2" *ngIf="actual.sourceTrack as track">
+        <div class="row ml-2 mt-2 mb-2" *ngIf="actual.sourceTrack as track">
           <img [src]="track.albumImageUri ? track.albumImageUri : 'wave.jpg'" height="80" width="80" >
           <div class="col">
             <div class="row pl-1">

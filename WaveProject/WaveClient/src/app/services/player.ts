@@ -177,11 +177,11 @@ export class PlayerService {
         const list = this.tracksSubject$.value
         let index = prev
         do{
-            index = index + 1
+            index++
             if(index >= list.length){
                 index = 0
             }
-        }while(!list[index].sourceTrack.uri || index == prev)
+        }while(!list[index].sourceTrack.uri)
         this.playSelected(index)
     }
 

@@ -10,7 +10,8 @@
         <span>{{track.title}}</span>
       </div>
       <div class="row" *ngIf="!isArtistTop">
-        <a [routerLink]='["/artist/"+track.artistId]'>{{track.artistName}}</a>
+        <a class="mr-2" [routerLink]='["/artist/"+track.artistId]'>{{track.artistName}}</a>
+        <a *ngIf="isSearch" [routerLink]='["/album/"+track.albumId]'>{{track.albumLabel}}</a>
       </div>
     </div>
     <div class="d-flex align-items-center">

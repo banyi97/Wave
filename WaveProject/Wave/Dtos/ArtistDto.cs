@@ -12,5 +12,7 @@ namespace Wave.Dtos
         public string Description { get; set; }
 
         public ImageDto Image { get; set; }
+
+        public string Type => "Artist";
     }
 }

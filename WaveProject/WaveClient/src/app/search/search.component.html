@@ -70,7 +70,7 @@
       <div *ngIf="selected==3">
         <ul class="list-group">
           <li *ngFor="let track of searchRes" class="list-group-item" [contextMenu]="basicMenu" [contextMenuSubject]="track">
-            <app-track-view [track]="track"></app-track-view>
+            <app-track-view [track]="track" isSearch=true></app-track-view>
           </li>
         </ul>
       </div>

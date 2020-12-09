@@ -1,6 +1,9 @@
 <mat-toolbar color="primary">     
   <mat-toolbar-row>
     <span>
+      <button *ngIf="flex.sideBarButtonIsVisible" mat-button (click)="sidebarMenu()">
+        <mat-icon aria-hidden="false" aria-label="back">menu</mat-icon>
+      </button>
       <button mat-button (click)="location.back()">
         <mat-icon aria-hidden="false" aria-label="back">chevron_left</mat-icon>
       </button>

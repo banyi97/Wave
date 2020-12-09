@@ -14,5 +14,7 @@ namespace Wave.Dtos
 
         public DateTime CreateDate { get; set; }
         public PlaylistTrackDto Track { get; set; }
+
+        public string Type => "PlaylistElement";
     }
 }

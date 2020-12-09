@@ -15,5 +15,7 @@ namespace Wave.Dtos
         public int NumberOf { get; set; }
         public ImageDto Image { get; set; }
         public List<PlaylistElementDto> PlaylistElements { get; set; }
+
+        public string Type => "Playlist";
     }
 }

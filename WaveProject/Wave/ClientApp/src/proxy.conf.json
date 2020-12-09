@@ -1,0 +1,13 @@
+{
+    "/api/*": {
+        "target": "https://localhost:44302",
+        "secure": false,
+        "logLevel": "debug"
+    },
+    "/notification/*": {
+        "target": "https://localhost:44302",
+        "secure": false,
+        "logLevel": "debug",
+        "ws": true
+    }
+}

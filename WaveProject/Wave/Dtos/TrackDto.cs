@@ -25,5 +25,7 @@ namespace Wave.Dtos
         public bool IsPlayable { get; set; }
         public int DiscNumber { get; set; }
         public int NumberOf { get; set; }
+
+        public string Type => "Track";
     }
 }

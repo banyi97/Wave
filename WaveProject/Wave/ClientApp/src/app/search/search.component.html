@@ -1,0 +1,95 @@
+<div class="container">
+
+  <div class="input-group py-2">
+    <input [value]="box" class="form-control" autofocus (keyup)="onSearch($event.target.value)" type="text" placeholder="Start typing..." />
+  </div>
+
+  <div class="text-center" *ngIf="isEmpty">
+    <h4>No results found for " "</h4>
+    <p>Please make sure your words are spelled correctly or use less or different keywords.</p>
+  </div>
+
+  <div *ngIf="isResult">
+
+    <ul class="nav">
+      <li class="nav-item">
+        <button class="btn" [ngClass]="{ 'btn-primary': selected == 0 }" (click)="changeSelectedTab(0)">Top results</button>
+      </li>
+      <li class="nav-item">
+        <button class="btn" [ngClass]="{ 'btn-primary': selected && selected == 1 }" (click)="changeSelectedTab(1)">Artists</button>
+      </li>
+      <li class="nav-item">
+        <button class="btn" [ngClass]="{ 'btn-primary': selected && selected == 2 }" (click)="changeSelectedTab(2)">Albums</button>
+      </li>
+      <li class="nav-item">
+        <button class="btn" [ngClass]="{ 'btn-primary': selected && selected == 3 }" (click)="changeSelectedTab(3)">Songs</button>
+      </li>
+      <li class="nav-item">
+        <button class="btn" [ngClass]="{ 'btn-primary': selected && selected == 4 }" (click)="changeSelectedTab(4)">Playlists</button>
+      </li>
+    </ul>
+
+    <br />
+
+    <div *ngIf="isLoaded">
+
+      <div *ngIf="selected==0">
+        <div>
+          <ul class="list-group">
+            <li *ngFor="let song of searchRes.songs" class="list-group-item" [contextMenu]="basicMenu" [contextMenuSubject]="track">
+              <app-track-view [track]="track"></app-track-view>
+            </li>
+          </ul>
+        </div>
+        <h3>Artists</h3>
+        <div class="row">
+          <app-artist-view class="mx-2 mt-2" [artist]="artist" *ngFor="let artist of searchRes.artists" [contextMenu]="basicMenu" [contextMenuSubject]="artist"></app-artist-view>
+        </div>
+        <h3>Albums</h3>
+        <div class="row">
+          <app-album-view class="mx-2 mt-2" [album]="album"  *ngFor="let album of searchRes.albums" [contextMenu]="basicMenu" [contextMenuSubject]="album"></app-album-view>
+        </div>
+        <h3>Playlists</h3>
+        <div class="row">
+          <app-playlist-view class="mx-2 mt-2" [playlist]="playlist" *ngFor="let playlist of searchRes.playlists" [contextMenu]="basicMenu" [contextMenuSubject]="playlist"></app-playlist-view>
+        </div>
+      </div>
+
+      <div *ngIf="selected==1">
+        <div class="row">
+          <app-artist-view class="mx-2 mt-2" [artist]="artist" *ngFor="let artist of searchRes" [contextMenu]="basicMenu" [contextMenuSubject]="artist"></app-artist-view>
+        </div>
+      </div>
+
+      <div *ngIf="selected==2">
+        <div class="row">
+          <app-album-view class="mx-2 mt-2" [album]="album" *ngFor="let album of searchRes" [contextMenu]="basicMenu" [contextMenuSubject]="album"></app-album-view>
+        </div>
+      </div>
+
+      <div *ngIf="selected==3">
+        <ul class="list-group">
+          <li *ngFor="let track of searchRes" class="list-group-item" [contextMenu]="basicMenu" [contextMenuSubject]="track">
+            <app-track-view [track]="track" isSearch=true></app-track-view>
+          </li>
+        </ul>
+      </div>
+
+      <div *ngIf="selected==4">
+        <div class="row">
+          <app-playlist-view class="mx-2 mt-2" *ngFor="let playlist of searchRes" [playlist]="playlist" [contextMenu]="basicMenu" [contextMenuSubject]="playlist"></app-playlist-view>
+        </div>
+      </div>
+
+    </div>
+    <mat-progress-bar *ngIf="!isLoaded" mode="indeterminate"></mat-progress-bar>
+  </div>
+</div>
+
+<context-menu #basicMenu>
+  <ng-template *ngFor="let action of contextMenuActions" contextMenuItem let-item
+               [visible]="action.visible" [enabled]="action.enabled" [divider]="action.divider"
+               (execute)="action.click($event.item)">
+    {{ action.html(item) }}
+  </ng-template>
+</context-menu>

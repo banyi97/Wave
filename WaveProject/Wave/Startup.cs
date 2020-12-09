@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Auth0.ManagementApi;
+using Microsoft.AspNetCore.SpaServices.AngularCli;
 
 namespace Wave
 {
@@ -78,6 +79,11 @@ namespace Wave
                 
                 options.TokenValidationParameters.NameClaimType = ClaimTypes.NameIdentifier;
                 options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
+            });
+
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "ClientApp/dist";
             });
 
             services.AddOptions();
@@ -139,7 +145,11 @@ namespace Wave
                     sw.SwaggerEndpoint("/swagger/v1/swagger.json", "Wave API V1");
                 });
             }
-
+            app.UseStaticFiles();
+            if (!env.IsDevelopment())
+            {
+                app.UseSpaStaticFiles();
+            }
             app.UseHttpsRedirection();
 
             app.UseRouting();
@@ -151,6 +161,19 @@ namespace Wave
             {
                 endpoints.MapControllers().RequireAuthorization();
                 endpoints.MapHub<NotificationHub>("/notification");
+            });
+
+            app.UseSpa(spa =>
+            {
+                // To learn more about options for serving an Angular SPA from ASP.NET Core,
+                // see https://go.microsoft.com/fwlink/?linkid=864501
+
+                spa.Options.SourcePath = "ClientApp";
+
+                if (env.IsDevelopment())
+                {
+                    spa.UseAngularCliServer(npmScript: "start");
+                }
             });
         }
     }

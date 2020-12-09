@@ -1,0 +1,114 @@
+<mat-tab-group *ngIf="album">
+    <mat-tab label="Album"> 
+        <div class="col">
+            <div *ngIf="!isModify">
+                <div>
+                    <h3>Album name: {{album.label}}</h3>
+                </div>
+                <div>
+                    <h3>Release date: {{album.releaseDate | date}}</h3>
+                </div>
+                <div>
+                    <h3 *ngIf="album.albumType == 0">Type: Album</h3>
+                    <h3 *ngIf="album.albumType == 1">Type: Single</h3>
+                    <h3 *ngIf="album.albumType == 2">Type: EP</h3>
+                </div>
+                <div>
+                    <h3>Available album from {{album.availableFromUtfTime | date}} - UTF time</h3>
+                </div>
+                <div>
+                    <button mat-button (click)="modifyAlbum()">Modify</button>
+                    <button mat-button (click)="removeAlbum()">Remove</button>
+                </div>
+            </div>
+            <div *ngIf="isModify">
+                <form [formGroup]="albumForm">
+
+                    <div class="col">
+                        <div>
+                            <mat-form-field>
+                                <mat-label>Label</mat-label>
+                                <input matInput placeholder="Label of the album" formControlName="label" required>
+                            </mat-form-field>
+                        </div>
+                        <div>
+                            <div>
+                                <mat-radio-group aria-label="Select an option" formControlName="releaseDatePrecision">
+                                    <mat-radio-button value="0">Day</mat-radio-button>
+                                    <mat-radio-button value="1">Month</mat-radio-button>
+                                    <mat-radio-button value="2">Year</mat-radio-button>
+                                  </mat-radio-group>
+                            </div>
+                            <div>
+                                <mat-form-field appearance="fill">
+                                    <mat-label>Set new release date</mat-label>
+                                    <input matInput [matDatepicker]="picker" formControlName="releaseDate">
+                                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                    <mat-datepicker #picker></mat-datepicker>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div>
+                            <mat-form-field appearance="fill">
+                                <mat-label>Type of album</mat-label>
+                                <mat-select formControlName="albumType">
+                                  <mat-option *ngFor="let type of albumTypes" [value]="type.value">
+                                    {{type.viewValue}}
+                                  </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <div>
+                            <button mat-button (click)="saveAlbum()">Save</button>
+                            <button mat-button (click)="isModify = false">Cancel</button>
+                        </div>
+                    </div>
+
+                </form>
+               
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="row">
+                        <p>Album image:</p>
+                    </div>
+                    <div class="row">
+                        <img [src]="album.image.uri" height="200" width="200" alt="">
+                    </div>
+                </div>
+            </div>
+            <button mat-button (click)="setNewImage()">Set new image</button>
+
+        </div>
+    </mat-tab>
+    <mat-tab label="Tracks"> 
+        <div *ngIf="!isTracksModify">
+            <mat-nav-list >
+                <mat-list-item *ngFor="let track of album.tracks">
+                {{track.title}}
+                </mat-list-item>
+            </mat-nav-list>
+            <button mat-button (click)="modifyTracks()">Modify</button>
+        </div>
+        <div *ngIf="isTracksModify" class="col">
+            <div>
+                <mat-nav-list cdkDropList (cdkDropListDropped)="drop($event)">
+                    <mat-list-item *ngFor="let track of album.tracks" cdkDrag>
+                    {{track.title}}
+                    </mat-list-item>
+                </mat-nav-list>
+            </div>
+            <div>
+                <button mat-button (click)="addTrack()">Add new track</button>
+            </div>
+            <div>
+                <button mat-button>Save</button>
+                <button mat-button (click)="isTracksModify = false">Cancel</button>
+            </div>
+        </div>
+    </mat-tab>
+    <mat-tab label="Statistics"> 
+        graphicons...
+    </mat-tab>
+</mat-tab-group>

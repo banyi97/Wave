@@ -9,6 +9,7 @@ import { Track } from '../../models/track';
 export class TrackViewComponent {
   constructor() {}
   @Input() isArtistTop: boolean = false
+  @Input() isSearch: boolean = false
   @Input() track: Track
   @Input() index: number
   @Output() playThis = new EventEmitter<number>();

@@ -1,6 +1,6 @@
 <body class="fullpage">
   <mat-drawer-container class="drawer-full-cont"  >
-    <mat-drawer mode="side" opened>
+    <mat-drawer [mode]="flex.mode" [(opened)]="flex.sideBarIsOpen">
       <app-nav-menu></app-nav-menu>
     </mat-drawer>
     <mat-drawer-content>

@@ -20,5 +20,7 @@ namespace Wave.Dtos
 
         public List<TrackDto> Tracks { get; set; }
         public ImageDto Image { get; set; }
+
+        public string Type => "Album";
     }
 }
