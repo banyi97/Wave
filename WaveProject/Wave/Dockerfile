@@ -5,7 +5,8 @@ FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
 RUN apt-get update -yq \
     && apt-get install curl gnupg -yq \
     && curl -sL https://deb.nodesource.com/setup_10.x | bash \
-    && apt-get install nodejs -yq
+    && apt-get install nodejs -yq \
+    && npm i -g @angular/cli -yg
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
@@ -14,7 +15,8 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 RUN apt-get update -yq \
     && apt-get install curl gnupg -yq \
     && curl -sL https://deb.nodesource.com/setup_10.x | bash \
-    && apt-get install nodejs -yq
+    && apt-get install nodejs -yq \
+    && npm i -g @angular/cli -yg
 WORKDIR /src
 COPY ["Wave/Wave.csproj", "Wave/"]
 RUN dotnet restore "Wave/Wave.csproj"

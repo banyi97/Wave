@@ -16,6 +16,9 @@ services:
         depends_on:
             - db
             - blob
+        ports:
+            - '4200:80'
+            - '4201:443'
         environment:
             CONNECTIONSTRINGS__DEFAULTCONNECTION: "Server=db;Database=wave;User=sa;Password=1Secure*Password1;"
             AUTH0APICONFIG__AUTHORITY: "https://banyi97.eu.auth0.com/"
