@@ -16,6 +16,7 @@ using Wave.Database;
 using Wave.Dtos;
 using Wave.Models;
 using Wave.Services;
+using Wave.Validators;
 
 namespace Wave.Controllers
 {
@@ -82,6 +83,10 @@ namespace Wave.Controllers
         {
             var artist = await _dbContext.Artists.FindAsync(dto.ArtistId);
             if (artist is null)
+                return BadRequest();
+            var validator = new CreateAlbumValidator();
+            var valRes = await validator.ValidateAsync(dto);
+            if (!valRes.IsValid)
                 return BadRequest();
 
             if (artist.ApplicationUserId != this.User.Identity.Name)

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Wave.Dtos;
 using Wave.Models;
 using Wave.Services;
+using Wave.Validators;
 
 namespace WaveTest
 {
@@ -13,7 +14,7 @@ namespace WaveTest
     {
         IMapper mapper;
 
-        [SetUp]
+        [OneTimeSetUp]
         public void BeforeEachTest()
         {
             var configuration = new MapperConfiguration(cfg =>
@@ -38,18 +39,6 @@ namespace WaveTest
             Assert.AreEqual(2, list[2].NumberOf);
 
             Assert.Pass();
-        }
-
-        [Test]
-        public void TrackFileUriResolverIsNull()
-        {
-            var file = new Track();
-            var resolver = new TrackFileUriResolver();
-            var dest = new TrackDto();
-
-            resolver.Resolve(file, dest, nameof(dest.Uri), null);
-
-            Assert.IsNull(dest.Uri);
         }
 
         [Test]
@@ -80,6 +69,55 @@ namespace WaveTest
 
             Assert.IsNotNull(res);
             Assert.AreEqual(dto.Title, res.Title);
+        }
+
+        [Test]
+        public void CreateAlbumMapper()
+        {
+            var date = DateTime.Now;
+            var dto = new CreateAlbumDto
+            {
+                Label = "test title",
+                ReleaseDate = date
+            };
+
+            var res = mapper.Map<Album>(dto);
+   
+            Assert.IsNotNull(res);
+            Assert.AreEqual(dto.Label, res.Label);
+            Assert.AreEqual(dto.ReleaseDate, res.ReleaseDate);
+            Assert.IsNull(res.Image);
+            Assert.IsEmpty(res.Tracks);
+        }
+
+        [Test]
+        public void CreateplaylistFluent()
+        {
+            var dto = new CreatePlaylistDto
+            {
+                Title = "test title"
+            };
+            var validator = new CreatePlaylistValidator();
+            
+            var res = validator.Validate(dto);
+
+            Assert.IsNotNull(res);
+            Assert.IsTrue(res.IsValid);
+        }
+
+        [Test]
+        public void CreateplaylistFluentNotValidDto()
+        {
+            var dto = new CreatePlaylistDto
+            {
+                Title = null
+            };
+            var validator = new CreatePlaylistValidator();
+
+            var res = validator.Validate(dto);
+
+            Assert.IsNotNull(res);
+            Assert.IsFalse(res.IsValid);
         }
 
     }

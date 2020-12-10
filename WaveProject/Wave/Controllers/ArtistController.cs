@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Wave.Database;
 using Wave.Dtos;
 using Wave.Models;
+using Wave.Validators;
 
 namespace Wave.Controllers
 {
@@ -75,6 +76,10 @@ namespace Wave.Controllers
         public async Task<IActionResult> CreateArtist([FromBody] CreateArtistDto dto)
         {
             var artist = _mapper.Map<CreateArtistDto, Artist>(dto);
+            var validator = new CreateArtistValidator();
+            var valRes = await validator.ValidateAsync(dto);
+            if (!valRes.IsValid)
+                return BadRequest();
             artist.ApplicationUserId = this.User.Identity.Name;
             await _dbContext.Artists.AddAsync(artist);
             await _dbContext.SaveChangesAsync();

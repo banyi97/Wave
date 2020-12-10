@@ -16,6 +16,7 @@ using Wave.Dtos;
 using Wave.Hubs;
 using Wave.Models;
 using Wave.Services;
+using Wave.Validators;
 
 namespace Wave.Controllers
 {
@@ -91,6 +92,10 @@ namespace Wave.Controllers
         [HttpPost]
         public async Task<IActionResult> CreatePlaylist([FromBody] CreatePlaylistDto dto)
         {
+            var validator = new CreatePlaylistValidator();
+            var valRes = await validator.ValidateAsync(dto);
+            if (!valRes.IsValid)
+                return BadRequest();
             const int maxPlaylistNumber = 50;
             var playlists = await _dbContext.Playlists
                 .Where(q => q.ApplicationUserId == this.User.Identity.Name)
