@@ -7,7 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wave", "Wave\Wave.csproj", 
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{08D02D52-105C-445C-9719-7420A7C2C689}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaveTest", "..\WaveTest\WaveTest.csproj", "{F4218A3F-B309-4B60-A8EA-49977ABEBA49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WaveTest", "..\WaveTest\WaveTest.csproj", "{F4218A3F-B309-4B60-A8EA-49977ABEBA49}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B3590ACA-E0A9-476F-ADB2-CCECC6FD42CD}"
+	ProjectSection(SolutionItems) = preProject
+		inditas.txt = inditas.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
