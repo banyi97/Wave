@@ -54,6 +54,18 @@ export class PlaylistService {
     }
   }
 
+  public reorderPlaylist(prev: number, next: number){
+    if(prev == next)
+      return
+    const pl = this.selectedPlaylistSubject$.value;
+    const pe = pl.playlistElements[prev]
+    moveItemInArray(pl.playlistElements, prev, next)
+    this.selectedPlaylistSubject$.next(pl)
+    this.http.put(this.ep.playlistReOrder(pl.id, pe.id, next), null).subscribe(q => {
+      
+    })
+  }
+
   public addCreatedPlaylist(data: Playlist){
     const list = this.playlistSubject$.value
     list.push(data)

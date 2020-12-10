@@ -12,9 +12,7 @@ services:
         image: ${DOCKER_REGISTRY-}wave
         build:
             context: .
-            dockerfile: Wave/Dockerfile   
-            args:
-                - skip_client_build=false        
+            dockerfile: Wave/Dockerfile 
         depends_on:
             - db
             - blob
@@ -22,6 +20,9 @@ services:
             CONNECTIONSTRINGS__DEFAULTCONNECTION: "Server=db;Database=wave;User=sa;Password=1Secure*Password1;"
             AUTH0APICONFIG__AUTHORITY: "https://banyi97.eu.auth0.com/"
             AUTH0APICONFIG__IDENTIFIER: "https://waveapi"
+            AUTH0APICONFIG__CLIENTID: "JPZQiLb9tdI3mZLnOOr3Aa21IkwwBU7v"
+            AUTH0APICONFIG__CLIENTSECRET: "1f1em3LXDEpILszfKOjdMeqp4TBfWEsMj4__rfYR_CZ2HhpEx7FofvqxwYAVIW2n"
+            AUTH0APICONFIG__DOMAIN: "banyi97.eu.auth0.com"
             AZUREBLOBCONFIG__CONNECTIONSTRING: "AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=blob:10000/devstoreaccount1;"
             AZUREBLOBCONFIG__CONTAINERTRACK: "wavetrack"
             AZUREBLOBCONFIG__CONTAINERIMG: "waveimg"

@@ -220,6 +220,37 @@ namespace Wave.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "modify:admin")]
+        [HttpPut("{id}/tracks/{sId}")]
+        public async Task<IActionResult> ReorderTrack([FromRoute] string id, [FromRoute] string sId, [FromQuery] int next)
+        {
+
+            var elements = await _dbContext.Tracks
+                    .Include(q => q.Album)
+                    .Where(q => q.AlbumId == id)
+                    .OrderBy(q => q.NumberOf)
+                    .ThenByDescending(q => q.LatestUpdate)
+                    .ToListAsync();
+            var element = elements.SingleOrDefault(q => q.Id == sId);
+            if (element is null)
+                return Ok();
+
+            try
+            {
+                var plElement = elements[element.NumberOf];
+                elements.RemoveAt(element.NumberOf);
+                elements.Insert(next, plElement);
+                elements.Renumber();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return Ok();
+        }
+
         [Authorize(Policy = "remove:admin")]
         [HttpDelete("{id}/tracks/{sId}")]
         public async Task<IActionResult> RemoveTrack([FromRoute] string id, [FromRoute] string sId)

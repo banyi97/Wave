@@ -3,18 +3,15 @@
         <div class="col">
             <div *ngIf="!isModify">
                 <div>
-                    <h3>Album name: {{album.label}}</h3>
+                    Album name: {{album.label}}
                 </div>
                 <div>
-                    <h3>Release date: {{album.releaseDate | date}}</h3>
+                    Release date: {{album.releaseDate | date}}
                 </div>
                 <div>
-                    <h3 *ngIf="album.albumType == 0">Type: Album</h3>
-                    <h3 *ngIf="album.albumType == 1">Type: Single</h3>
-                    <h3 *ngIf="album.albumType == 2">Type: EP</h3>
-                </div>
-                <div>
-                    <h3>Available album from {{album.availableFromUtfTime | date}} - UTF time</h3>
+                    <div *ngIf="album.albumType == 0">Type: Album</div>
+                    <div *ngIf="album.albumType == 1">Type: Single</div>
+                    <div *ngIf="album.albumType == 2">Type: EP</div>
                 </div>
                 <div>
                     <button mat-button (click)="modifyAlbum()">Modify</button>
@@ -85,7 +82,7 @@
     <mat-tab label="Tracks"> 
         <div *ngIf="!isTracksModify">
             <mat-nav-list >
-                <mat-list-item *ngFor="let track of album.tracks">
+                <mat-list-item *ngFor="let track of album.tracks; index as i">
                 {{track.title}}
                 </mat-list-item>
             </mat-nav-list>
@@ -94,7 +91,7 @@
         <div *ngIf="isTracksModify" class="col">
             <div>
                 <mat-nav-list cdkDropList (cdkDropListDropped)="drop($event)">
-                    <mat-list-item *ngFor="let track of album.tracks" cdkDrag>
+                    <mat-list-item *ngFor="let track of album.tracks; index as i" cdkDrag>
                     {{track.title}}
                     </mat-list-item>
                 </mat-nav-list>

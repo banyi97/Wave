@@ -10,4 +10,5 @@ namespace Wave.Models
         public string ApiId { get; set; }
         public string Identifier { get; set; }
     }
+
 }

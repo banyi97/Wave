@@ -83,25 +83,60 @@
         <div *ngIf="!isTracksModify">
             <mat-nav-list >
                 <mat-list-item *ngFor="let track of album.tracks; index as i">
-                {{track.title}}
+                    <div class="row">
+                        <div>
+                            {{i + 1}}
+                        </div>
+                        <div class="ml-2">
+                            {{track.title}}
+                        </div>
+                    </div>
                 </mat-list-item>
             </mat-nav-list>
             <button mat-button (click)="modifyTracks()">Modify</button>
         </div>
-        <div *ngIf="isTracksModify" class="col">
-            <div>
-                <mat-nav-list cdkDropList (cdkDropListDropped)="drop($event)">
-                    <mat-list-item *ngFor="let track of album.tracks; index as i" cdkDrag>
-                    {{track.title}}
-                    </mat-list-item>
-                </mat-nav-list>
-            </div>
+
+        <div *ngIf="isTracksModify" class="col" >
+
+            <form [formGroup]="trackForm">
+                <div class="col" cdkDropList (cdkDropListDropped)="drop($event)">
+                    
+                    <ng-container formArrayName="tracks" >
+                        <div *ngFor="let _ of tracks.controls; index as i" >
+                          <ng-container [formGroupName]="i" >
+                            <div class="row" cdkDrag>
+                              <div class="col">
+                                <mat-form-field>
+                                  <mat-label>Title</mat-label>
+                                  <input matInput required formControlName="title">
+                                </mat-form-field>
+                              </div>
+                              <div class="col">
+                                <mat-checkbox formControlName="isExplicit">Explicit</mat-checkbox>
+                              </div>
+                              <div class="col">
+                                <input required [disabled]=true (change)="handleTrackFile($event.target.files, i)" type="file">
+                              </div>
+                              <div class="col">
+                                <button mat-button (click)="removeTrack(i)">Remove</button>
+                              </div>
+                              <div class="col">
+                                <button mat-button (click)="modifyTrack(i)">Modify</button>
+                              </div>
+                            </div>
+                          </ng-container>
+                        </div>
+                      </ng-container>
+
+                </div>
+
+            </form>
+
             <div>
                 <button mat-button (click)="addTrack()">Add new track</button>
             </div>
             <div>
-                <button mat-button>Save</button>
-                <button mat-button (click)="isTracksModify = false">Cancel</button>
+                <button mat-button (click)="modifyBack()">Back</button>
             </div>
         </div>
     </mat-tab>
