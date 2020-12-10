@@ -63,7 +63,7 @@ export class AdminAlbumComponent implements OnInit{
       albumType: [`${this.album.albumType}`, Validators.required],
       releaseDate: [this.album.releaseDate, [Validators.required]],
       releaseDatePrecision: [`${this.album.releaseDatePrecision}`, [Validators.required]],
-      availableFrom: ['this.album.availableFrom', [Validators.required]] // dto not contain -> later
+      availableFrom: ['this.album.availableFrom', [Validators.required]] 
     });
     this.isModify = true
   }
@@ -73,7 +73,8 @@ export class AdminAlbumComponent implements OnInit{
       return this.fb.group({
         title: [track.title, [Validators.required]],
         isExplicit: [track.isExplicit],
-        file: [null, Validators.required]
+        file: [null, Validators.required],
+        ismodify: false
       })
     })
     this.trackForm = this.fb.group({
@@ -83,10 +84,34 @@ export class AdminAlbumComponent implements OnInit{
     this.isTracksModify = true
   }
 
+  modifyTrack(){
+
+  }
+
+  modifyBack(){
+    this.isTracksModify = false;
+    this.http.get<any>(this.ep.albumUri(this.id)).subscribe(resp =>{
+      this.album = resp
+    })
+  }
+
+  removeTrack(index: number){
+    const id = this.album.tracks[index].id
+    this.http.delete(this.ep.albumRemoveTrack(this.album.id, id)).subscribe(q => {
+      this.tracks.removeAt(index)
+      this.album.tracks = this.album.tracks.filter(q => q.id != id)
+    })
+  }
+
   drop(event: CdkDragDrop<FormGroup[]>) {
-    const arr = this.tracks.value
+    var arr = this.tracks.value
+    var track = this.album.tracks[event.previousIndex]
+    console.log(track)
     moveItemInArray(arr, event.previousIndex, event.currentIndex)
     this.trackForm.controls.tracks.setValue(arr)
+    this.http.put(this.ep.albumTrackOrder(this.album.id, track.id, event.currentIndex), null).subscribe(q => {
+      moveItemInArray(this.album.tracks, event.previousIndex, event.currentIndex)
+    })
   }
 
   addTrack(){
@@ -142,6 +167,15 @@ export class AdminAlbumComponent implements OnInit{
         })
       }
     })
+  }
+
+  handleTrackFile(files: FileList, index: number){
+    let file : any = null
+    if(files.length > 0){
+      file = files.item(0)
+    }
+    const group = this.tracks.controls[index] as FormGroup
+    group.controls.file.setValue(file)
   }
 
   createAlbum(){

@@ -52,7 +52,7 @@ export class PlaylistComponent implements OnInit, OnDestroy {
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    //this.ps.reOrderPlaylist(event.previousIndex, event.currentIndex)
+    this.ps.reorderPlaylist(event.previousIndex, event.currentIndex)
   }
 
   ngOnDestroy(): void {

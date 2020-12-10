@@ -35,6 +35,12 @@ export class EndpointService {
   albumTrack(id: string, sId: string){
     return `${this.serverUri}/api/Album/${id}/track/${sId}`
   }
+  albumTrackOrder(id: string, sId: string, next: number){
+    return `${this.serverUri}/api/Album/${id}/tracks/${sId}?next=${next}`
+  }
+  albumRemoveTrack(id: string, sId: string){
+    return `${this.serverUri}/api/Album/${id}/tracks/${sId}`
+  }
 
   // ### Artist 
   artistUri(id: string = null) {
