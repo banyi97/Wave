@@ -14,8 +14,8 @@ Portszám fontos!!!
 /WaveProject/WaveClient helyen futtatni: 
 npm i // teleptjük a függőségeket
 ng serve // elindítjuk a klienst
-Ha nem csatlakozna, akkor a backendhez, ClientApp/src/proxy.conf.json fájlban a 2 target helyén a portszámot a backend által használt portszámra cseréljül
-Ha az alap 4200-as porton futtatjuk akkor működnie kell az én Auth0 azonosítómon keresztül.
+Ha nem csatlakozna a backendhez, ClientApp/src/proxy.conf.json fájlban a 2 target helyén a portszámot a backend által használt portszámra cseréljül
+Ha az alap 4200-as porton futtatjuk akkor működnie kell az Auth0 bejelentkezésnek.
 
 ##############################
 Alkalmazás teljesen dockerben:
@@ -24,7 +24,7 @@ Alkalmazás teljesen dockerben:
 VS-el a projektet megnyitva lebuildelni
 Majd átváltani docker-compose projektre és futtatni
 A backend swagger hamar bejön, ellenben a kliens sokáig tölt, lehet timeoutol is az elején
-A port ki van vezetve 4201-re is, így https://localhost:4201/ el kell érni, ezen a porton keresztül közvetlenül fog működni az Auth0-val is az én adataimon keresztül.
+A port ki van vezetve 4201-re is, így https://localhost:4201/ el kell érni, ezen a porton keresztül közvetlenül működnie kell az Auth0 bejelentkezésnek.
 
 Admin user
 asd1@asd.hu - ASDdsa123
