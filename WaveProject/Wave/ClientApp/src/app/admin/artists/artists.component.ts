@@ -19,6 +19,9 @@ export class AdminArtistsComponent {
     this.http.get<any>(this.ep.artistUri()).subscribe(resp =>{
       console.log(resp)
       this.artists = resp
+    }, err =>{
+      alert("403")
+      this.router.navigate(['/'])
     })
   }
   public artists: []
