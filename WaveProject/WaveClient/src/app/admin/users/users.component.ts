@@ -28,6 +28,10 @@ export class AdminUsersComponent {
     this.http.get<any>(this.ep.users()).subscribe(resp =>{
       console.log(resp)
       this.users = resp
+    },
+    err => {
+      alert("403")
+      this.router.navigate(['/'])
     })
   }
   public users = []

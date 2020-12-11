@@ -25,3 +25,6 @@ VS-el a projektet megnyitva lebuildelni
 Majd átváltani docker-compose projektre és futtatni
 A backend swagger hamar bejön, ellenben a kliens sokáig tölt, lehet timeoutol is az elején
 A port ki van vezetve 4201-re is, így https://localhost:4201/ el kell érni, ezen a porton keresztül közvetlenül fog működni az Auth0-val is az én adataimon keresztül.
+
+Admin user
+asd1@asd.hu - ASDdsa123
